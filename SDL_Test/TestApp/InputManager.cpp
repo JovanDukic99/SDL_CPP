@@ -12,6 +12,10 @@ void InputManager::setMouseCoordinates(int x, int y) {
 	mouseCoordinates = glm::ivec2(x, y);
 }
 
+void InputManager::setMoving(bool moving) {
+	this->moving = moving;
+}
+
 glm::ivec2 InputManager::getMouseCoordinates() {
 	return mouseCoordinates;
 }
@@ -24,4 +28,8 @@ bool InputManager::isKeyPressed(unsigned int keyID) {
 	}
 
 	return false;
+}
+
+bool InputManager::isMoving() {
+	return moving;
 }

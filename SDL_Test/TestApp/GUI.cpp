@@ -15,12 +15,18 @@ GUI::~GUI() {
 	if (renderer != nullptr) {
 		SDL_DestroyRenderer(renderer);
 	}
-	
+
+	if (font != nullptr) {
+		TTF_CloseFont(font);
+	}
+
+	TTF_Quit();
 	SDL_Quit();
 }
 
 void GUI::init() {
 	initSDL();
+	initTTF();
 	initComponents();
 	run();
 }
@@ -54,9 +60,35 @@ void GUI::initSDL() {
 	}
 }
 
+void GUI::initTTF() {
+	if (TTF_Init() == -1) {
+		std::cout << "TTF_Init has failed." << std::endl;
+	}
+}
+
 void GUI::initComponents() {
+	// adjust rubber
 	rubber.w = RUBBER_WIDTH;
 	rubber.h = RUBBER_HEIGHT;
+
+	// load fonts
+	if ((font = TTF_OpenFont("fonts/Eastwood.ttf", 36)) == nullptr) {
+		std::cout << "TTF_OpenFont has failed: " << TTF_GetError() << std::endl;
+	}
+
+	// set font attributes
+	//TTF_SetFontStyle(font, TTF_STYLE_BOLD);
+
+	int minx, maxx, miny, maxy, advance;
+	if (TTF_GlyphMetrics(font, 'g', &minx, &maxx, &miny, &maxy, &advance) == -1)
+		printf("%s\n", TTF_GetError());
+	else {
+		printf("minx    : %d\n", minx);
+		printf("maxx    : %d\n", maxx);
+		printf("miny    : %d\n", miny);
+		printf("maxy    : %d\n", maxy);
+		printf("advance : %d\n", advance);
+	}
 }
 
 void GUI::run() {
@@ -78,6 +110,7 @@ void GUI::handleInputEvents() {
 			break;
 		}
 		case SDL_MOUSEMOTION: {
+			inputManager.setMoving(true);
 			inputManager.setMouseCoordinates(event.motion.x, event.motion.y);
 			break;
 		}
@@ -111,68 +144,104 @@ void GUI::update() {
 	
 	player.update(inputManager);
 
-	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
+	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && inputManager.isMoving()) {
 		hudPanel.update(inputManager);
 
 		glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
-		Button* button = hudPanel.getSelectedButton();
-		SDL_Rect rect;
 
-		if (button != nullptr) {
-			int ID = button->getID();
+		if (mouseCoords.y < hudPanel.getComponents()[0].getBounds()->y) {
+			Button* button = hudPanel.getSelectedButton();
 
-			switch (ID)
-			{
-			case 0: {
-				rect.w = UNIT_WIDTH * 0.1f;
-				rect.h = UNIT_HEIGHT * 0.1f;
+			if (button != nullptr) {
+				int ID = button->getID();
 
-				int x = mouseCoords.x - rect.w / 2;
-				int y = mouseCoords.y - rect.h / 2;
+				switch (ID)
+				{
+				case 0: {
+					SDL_Rect rect;
 
-				rect.x = x;
-				rect.y = y;
+					rect.w = UNIT_WIDTH / 10;
+					rect.h = UNIT_HEIGHT / 10;
 
-				blocks.push_back(rect);
+					int x = mouseCoords.x - rect.w / 2;
+					int y = mouseCoords.y - rect.h / 2;
 
-				break;
-			}
-			case 1: {
-				rect.w = 4 * UNIT_WIDTH / 10;
-				rect.h = 4 *UNIT_HEIGHT / 10;
-				break;
-			}
-			case 2: {
-				rect.w = 8 * UNIT_WIDTH / 10;
-				rect.h = 8 *UNIT_HEIGHT / 10;
+					rect.x = x;
+					rect.y = y;
 
-				int startX = mouseCoords.x - UNIT_WIDTH * 0.1f / 2;
-				int startY = mouseCoords.y - UNIT_HEIGHT * 0.1f / 2;
+					blocks.push_back(rect);
+					break;
+				}
+				case 1: {
+					int rectWidth = 4 * UNIT_WIDTH / 10;
+					int rectHeight = rectWidth;
 
-				rect.x = x;
-				rect.y = y;
+					int startX = mouseCoords.x - rectWidth / 2;
+					int startY = mouseCoords.y - rectHeight / 2;
 
-				blocks.push_back(rect);
+					int rowNumber = rectWidth / 6;
+					int columnNumber = rowNumber;
 
-				break;
-			}
-			default:
-				rect.w = UNIT_WIDTH / 10;
-				rect.h = UNIT_HEIGHT / 10;
+					for (int i = 0; i < rowNumber; i++) {
+						for (int j = 0; j < columnNumber; j++) {
+							SDL_Rect rect;
 
-				int x = mouseCoords.x - UNIT_WIDTH * 0.1f / 2;
-				int y = mouseCoords.y - UNIT_HEIGHT * 0.1f / 2;
+							rect.w = UNIT_WIDTH / 10;
+							rect.h = UNIT_HEIGHT / 10;
 
-				rect.x = x;
-				rect.y = y;
+							rect.x = startX + j * rect.w;
+							rect.y = startY + i * rect.h;
 
-				blocks.push_back(rect);
+							blocks.push_back(rect);
+						}
+					}
 
-				break;
+					break;
+				}
+				case 2: {
+					int startX = mouseCoords.x - UNIT_WIDTH / 2;
+					int startY = mouseCoords.y - UNIT_HEIGHT / 2;
+
+					int rowNumber = UNIT_WIDTH / 6;
+					int columnNumber = rowNumber;
+
+					for (int i = 0; i < rowNumber; i++) {
+						for (int j = 0; j < columnNumber; j++) {
+							SDL_Rect rect;
+
+							rect.w = UNIT_WIDTH / 10;
+							rect.h = UNIT_HEIGHT / 10;
+
+							rect.x = startX + j * rect.w;
+							rect.y = startY + i * rect.h;
+
+							blocks.push_back(rect);
+						}
+					}
+
+					break;
+				}
+				default:
+					SDL_Rect rect;
+
+					rect.w = UNIT_WIDTH / 10;
+					rect.h = UNIT_HEIGHT / 10;
+
+					int x = mouseCoords.x - rect.w / 2;
+					int y = mouseCoords.y - rect.h / 2;
+
+					rect.x = x;
+					rect.y = y;
+
+					blocks.push_back(rect);
+					break;
+				}
+
 			}
 
 		}
 
+		inputManager.setMoving(false);
 	}
 	
 	
@@ -201,6 +270,7 @@ void GUI::draw() {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderFillRect(renderer, nullptr);
 
+	drawText();
 	drawGrid();
 	drawBlocks();
 	drawPlayer();
@@ -253,4 +323,49 @@ void GUI::drawHUD() {
 		SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
 		SDL_RenderFillRect(renderer, base.getBounds());
 	}
+}
+
+void GUI::drawText() {
+	drawText("Block number: " + std::to_string(blocks.size()), 0, 0);
+	drawText("Eastwood", 100, 100);
+}
+
+void GUI::drawText(std::string text, int x, int y) {
+	SDL_Rect position;
+
+	int xMin, xMax, yMin, yMax, advance;
+	TTF_GlyphMetrics(font, 'g', &xMin, &xMax, &yMin, &yMax, &advance);
+
+	int width = xMax - xMin;
+
+	int textHeight = (yMax - yMin) + advance;
+	int textWidth = advance * text.size();
+
+	position.x = x;
+	position.y = y;
+	position.w = textWidth;
+	position.h = textHeight;
+
+	drawText(&position, text);
+}
+
+void GUI::drawText(SDL_Rect* position, std::string& text) {
+	SDL_Color colorFG{ 255, 255, 255, 255 };
+	SDL_Color colorBG{ 0, 0, 0, 255 };
+	SDL_Surface* textSurface;
+	SDL_Texture* texture;
+
+	if ((textSurface = TTF_RenderUTF8_Shaded(font, text.c_str(), colorFG, colorBG)) != nullptr) {
+		if ((texture = SDL_CreateTextureFromSurface(renderer, textSurface)) == nullptr) {
+			std::cout << "SDL_BlitSurface has failed." << std::endl;
+		}
+		else {
+			SDL_RenderCopy(renderer, texture, NULL, position);
+		}
+		SDL_FreeSurface(textSurface);
+	}
+	else {
+		std::cout << "TTF_RenderText_Solid has failed." << std::endl;
+	}
+
 }

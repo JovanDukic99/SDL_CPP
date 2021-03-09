@@ -4,7 +4,9 @@
 #include "MainPanel.h"
 #include "HudBase.h"
 #include <SDL/SDL.h>
+#include <SDL_TTF/SDL_ttf.h>
 #include <vector>
+#include <string>
 
 class GUI
 {
@@ -22,6 +24,7 @@ private:
 	InputManager inputManager;
 	SDL_Rect rubber;
 	MainPanel hudPanel;
+	TTF_Font* font;
 	std::vector<SDL_Rect> blocks;
 	bool shouldDrawRubber;
 public:
@@ -30,6 +33,7 @@ public:
 private:
 	void init();
 	void initSDL();
+	void initTTF();
 	void initComponents();
 	void run();
 	void handleInputEvents();
@@ -40,5 +44,8 @@ private:
 	void drawBlocks();
 	void drawRubber();
 	void drawHUD();
+	void drawText();
+	void drawText(std::string text, int x, int y);
+	void drawText(SDL_Rect* position, std::string& text);
 };
 
