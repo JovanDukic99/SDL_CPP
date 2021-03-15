@@ -1,5 +1,6 @@
 #include "GUI.h"
 #include "Config.h"
+#include "Component.h"
 #include "Utils.h"
 #include <iostream>
 
@@ -86,6 +87,10 @@ void GUI::initComponents() {
 	rubber.w = RUBBER_WIDTH;
 	rubber.h = RUBBER_HEIGHT;
 
+	// forward the renderer to mainPanel
+	mainPanel.setRenderer(renderer);
+	mainPanel.init();
+
 	// load fonts
 	if ((font = TTF_OpenFont("fonts/Eastwood.ttf", 36)) == nullptr) {
 		std::cout << "TTF_OpenFont has failed: " << TTF_GetError() << std::endl;
@@ -165,89 +170,36 @@ void GUI::update() {
 		return;	
 	}
 
+	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
+		if (mainPanel.update(inputManager)) {
+			drawHUD();
+			inputManager.releaseKey(SDL_BUTTON_LEFT);
+		}
+	}
+
 	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && inputManager.isMoving()) {
 		change = true;
 
-		if (hudPanel.update(inputManager)) {
-			drawHUD();
-		}
-
 		glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
 
-		if (mouseCoords.y < hudPanel.getComponents()[0].getBounds()->y) {
-			Button* button = hudPanel.getSelectedButton();
+		if (mouseCoords.y >  2 * UNIT_HEIGHT) {
+			int brushSize = mainPanel.getBrushSize();
+			Color color = mainPanel.getSelectedColor();
 
-			if (button != nullptr) {
-				int ID = button->getID();
+			int width = brushSize * UNIT_WIDTH / 10;
+			int height = brushSize * UNIT_WIDTH / 10;
 
-				switch (ID)
-				{
-				case 0: {
-					SDL_Rect rect;
+			int x = mouseCoords.x - width / 2;
+			int y = mouseCoords.y - height / 2;
 
-					rect.w = UNIT_WIDTH / 10;
-					rect.h = UNIT_HEIGHT / 10;
+			SDL_Rect bounds = {x, y, width, height};
 
-					int x = mouseCoords.x - rect.w / 2;
-					int y = mouseCoords.y - rect.h / 2;
+			SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+			SDL_RenderFillRect(renderer, &bounds);
 
-					rect.x = x;
-					rect.y = y;
-
-					SDL_RenderFillRect(renderer, &rect);
-					break;
-				}
-				case 1: {
-					SDL_Rect rect;
-
-					rect.w = 4 * UNIT_WIDTH / 10;
-					rect.h = 4 * UNIT_HEIGHT / 10;
-
-					rect.x = mouseCoords.x - rect.w / 2;
-					rect.y = mouseCoords.y - rect.h / 2;
-
-					SDL_RenderFillRect(renderer, &rect);
-					break;
-				}
-				case 2: {
-					SDL_Rect rect;
-
-					rect.w = UNIT_WIDTH;
-					rect.h = UNIT_HEIGHT;
-
-					rect.x = mouseCoords.x - rect.w / 2;
-					rect.y = mouseCoords.y - rect.h / 2;
-
-					SDL_RenderFillRect(renderer, &rect);
-					break;
-				}
-				case 3: {
-					drawCircle(mouseCoords.x, mouseCoords.y, 60);
-					break;
-				}
-				default:
-					SDL_Rect rect;
-
-					rect.w = UNIT_WIDTH / 10;
-					rect.h = UNIT_HEIGHT / 10;
-
-					int x = mouseCoords.x - rect.w / 2;
-					int y = mouseCoords.y - rect.h / 2;
-
-					rect.x = x;
-					rect.y = y;
-
-					SDL_RenderFillRect(renderer, &rect);
-					break;
-				}
-
-			}
-
+			inputManager.setMoving(false);
 		}
-
-		inputManager.setMoving(false);
 	}
-	
 	
 	if (inputManager.isKeyPressed(SDL_BUTTON_RIGHT)) {
 		change = true;
@@ -257,7 +209,7 @@ void GUI::update() {
 		rubber.x = mouseCoords.x - rubber.w / 2;
 		rubber.y = mouseCoords.y - rubber.h / 2;
 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderFillRect(renderer, &rubber);
 	}
 }
@@ -266,16 +218,6 @@ void GUI::initDraw() {
 	// draw background color
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderFillRect(renderer, nullptr);
-
-	SDL_Texture* texture = loadTexture(TEST_IMAGE_PATH);
-
-	if (texture != nullptr) {
-		SDL_Rect position = {100, 100, 64, 64};
-
-		SDL_RenderCopy(renderer, texture, NULL, &position);
-	}
-
-	SDL_DestroyTexture(texture);
 
 	// draw hud
 	drawHUD();
@@ -298,13 +240,36 @@ void GUI::drawGrid() {
 }
 
 void GUI::drawHUD() {
-	std::vector<HudBase> components = hudPanel.getComponents();
-	for (size_t i = 0; i < components.size(); i++) {
-		HudBase base = components[i];
-		Color color = base.getColor();
+	// draw panels
+	std::vector<Component> panels = mainPanel.getPanels();
+	for (size_t i = 0; i < panels.size(); i++) {
+		SDL_Rect bounds = panels[i].getBounds();
+		Color color = panels[i].getColor();
 
 		SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
-		SDL_RenderFillRect(renderer, base.getBounds());
+		SDL_RenderFillRect(renderer, &bounds);
+	}
+
+	// draw color buttons
+	std::vector<Component> colorButtons= mainPanel.getColorButtons();
+	for (size_t i = 0; i < colorButtons.size(); i++) {
+		SDL_Rect bounds = colorButtons[i].getBounds();
+		Color color = colorButtons[i].getColor();
+
+		SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+		SDL_RenderFillRect(renderer, &bounds);
+	}
+
+	// draw brush buttons
+	std::vector<Component> brushButtons = mainPanel.getBrushButtons();
+	for (size_t i = 0; i < brushButtons.size(); i++) {
+		SDL_Rect bounds = brushButtons[i].getBounds();
+		Color color = brushButtons[i].getColor();
+		SDL_Texture* texture = brushButtons[i].getTexture();
+
+		SDL_RenderCopy(renderer, texture, NULL, &bounds);
+		SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+		SDL_RenderDrawRect(renderer, &bounds);
 	}
 }
 
@@ -440,26 +405,3 @@ void GUI::updateScreen() {
 		change = false;
 	}
 }
-
-SDL_Texture* GUI::loadTexture(std::string filePath) {
-	SDL_Texture* texture = nullptr;
-	
-	SDL_Surface* loadedSurface = IMG_Load(filePath.c_str());
-
-	if (loadedSurface == nullptr) {
-		std::cout << "Failed to load the image." << std::endl;
-		return nullptr;
-	}
-
-	texture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
-
-	if (texture == nullptr) {
-		std::cout << "Failed to load the texture from image." << std::endl;
-		return nullptr;
-	}
-
-	SDL_FreeSurface(loadedSurface);
-
-	return texture;
-}
-

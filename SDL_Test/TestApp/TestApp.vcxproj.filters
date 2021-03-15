@@ -37,12 +37,6 @@
     <Filter Include="Header Files\hud">
       <UniqueIdentifier>{92cc60e8-02ef-46fb-aa42-378cab053a7a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\geometry">
-      <UniqueIdentifier>{33ebc3d1-f1e2-4b99-bda8-9ccfd111cd42}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\geometry">
-      <UniqueIdentifier>{f539d9c4-b213-4951-937a-c6a327faa973}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -60,20 +54,14 @@
     <ClCompile Include="MainPanel.cpp">
       <Filter>Source Files\hud</Filter>
     </ClCompile>
-    <ClCompile Include="Button.cpp">
-      <Filter>Source Files\hud</Filter>
-    </ClCompile>
-    <ClCompile Include="Panel.cpp">
-      <Filter>Source Files\hud</Filter>
-    </ClCompile>
     <ClCompile Include="Color.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
-    <ClCompile Include="HudBase.cpp">
-      <Filter>Source Files\hud</Filter>
+    <ClCompile Include="ImageLoader.cpp">
+      <Filter>Source Files\utils</Filter>
     </ClCompile>
-    <ClCompile Include="Circle.cpp">
-      <Filter>Source Files\geometry</Filter>
+    <ClCompile Include="Component.cpp">
+      <Filter>Source Files\hud</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -92,20 +80,14 @@
     <ClInclude Include="MainPanel.h">
       <Filter>Header Files\hud</Filter>
     </ClInclude>
-    <ClInclude Include="Button.h">
-      <Filter>Header Files\hud</Filter>
-    </ClInclude>
-    <ClInclude Include="Panel.h">
-      <Filter>Header Files\hud</Filter>
-    </ClInclude>
-    <ClInclude Include="HudBase.h">
-      <Filter>Header Files\hud</Filter>
-    </ClInclude>
     <ClInclude Include="Color.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
-    <ClInclude Include="Circle.h">
-      <Filter>Header Files\geometry</Filter>
+    <ClInclude Include="ImageLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>Header Files\hud</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

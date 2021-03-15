@@ -1,7 +1,6 @@
 #pragma once
 #include "InputManager.h"
 #include "MainPanel.h"
-#include "HudBase.h"
 #include <SDL/SDL.h>
 #include <SDL_TTF/SDL_ttf.h>
 #include <SDL_IMAGE/SDL_image.h>
@@ -23,7 +22,7 @@ private:
 	GameState gameState;
 	InputManager inputManager;
 	SDL_Rect rubber;
-	MainPanel hudPanel;
+	MainPanel mainPanel;
 	TTF_Font* font;
 	bool change;
 public:
@@ -45,8 +44,6 @@ private:
 	void drawText();
 	void drawText(std::string text, int x, int y);
 	void drawText(SDL_Rect* position, std::string& text);
-	void drawImage(std::string filePath, int);
 	void updateScreen();
-	SDL_Texture* loadTexture(std::string filePath);
 };
 
