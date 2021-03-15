@@ -3,3 +3,7 @@
 *.opendb
 *.db-shm
 *.db-wal
+*.ipch
+*.exe
+*.ilk
+*.pdb
