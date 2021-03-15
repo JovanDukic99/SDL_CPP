@@ -36,7 +36,7 @@ void MainPanel::initComponents() {
 	buttons[0].setColor(RED);
 }
 
-void MainPanel::update(InputManager inputManager) {
+bool MainPanel::update(InputManager inputManager) {
 	glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
 
 	// if there already selected button
@@ -59,7 +59,7 @@ void MainPanel::update(InputManager inputManager) {
 			if (mouseCoords.y >= bounds.y && mouseCoords.y <= bounds.y + bounds.h) {
 				// if we have clicked already selected button just return
 				if (selectedButton == &buttons[i]) {
-					return;
+					return false;
 				}
 				else {
 					buttons[i].setColor(RED);
@@ -73,7 +73,10 @@ void MainPanel::update(InputManager inputManager) {
 	// if there is already selected button and if change has occured
 	if (selectedButton != nullptr && flag) {
 		selectedButton->setColor(YELLOW);
+		return true;
 	}
+
+	return false;
 }
 
 // getters

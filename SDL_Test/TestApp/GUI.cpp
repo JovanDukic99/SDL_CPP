@@ -3,7 +3,11 @@
 #include "Utils.h"
 #include <iostream>
 
-GUI::GUI() : gameState(GameState::PLAY), player(START_PLAYER_X, START_PLAYER_X, UNIT_WIDTH, UNIT_HEIGHT), shouldDrawRubber(false), numberOfInsertedBlocks(0) {
+#define DESIRED_FPS 60
+#define MILISECONDS 1000
+#define DESIRED_FRAME_TIME (MILISECONDS / DESIRED_FPS)
+
+GUI::GUI() : gameState(GameState::PLAY), change(true) {
 	init();
 }
 
@@ -27,7 +31,9 @@ GUI::~GUI() {
 void GUI::init() {
 	initSDL();
 	initTTF();
+	initSDL_Image();
 	initComponents();
+	initDraw();
 	run();
 }
 
@@ -63,6 +69,15 @@ void GUI::initSDL() {
 void GUI::initTTF() {
 	if (TTF_Init() == -1) {
 		std::cout << "TTF_Init has failed." << std::endl;
+		return;
+	}
+}
+
+void GUI::initSDL_Image() {
+	int imageFlags = IMG_INIT_PNG;
+	if (!(IMG_Init(imageFlags) & imageFlags)) {
+		std::cout << "Could not initialize SDL_Image." << std::endl;
+		return;
 	}
 }
 
@@ -93,9 +108,17 @@ void GUI::initComponents() {
 
 void GUI::run() {
 	while (gameState != GameState::EXIT) {
+		Uint32 startTime = SDL_GetTicks();
 		handleInputEvents();
 		update();
-		draw();
+		updateScreen();
+
+		Uint32 endTime = SDL_GetTicks();
+		Uint32 frameTime = endTime - startTime;
+
+		if (DESIRED_FRAME_TIME > frameTime) {
+			SDL_Delay(DESIRED_FRAME_TIME - frameTime);
+		}
 	}
 }
 
@@ -127,10 +150,6 @@ void GUI::handleInputEvents() {
 			break;
 		}
 		case SDL_MOUSEBUTTONUP: {
-			if (event.button.button == SDL_BUTTON_LEFT) {
-				blockNumber.push(numberOfInsertedBlocks);
-				numberOfInsertedBlocks = 0;
-			}
 			inputManager.releaseKey(event.button.button);
 			break;
 		}
@@ -145,43 +164,13 @@ void GUI::update() {
 		gameState = GameState::EXIT;
 		return;	
 	}
-	/*else if (inputManager.isKeyPressed(SDLK_LCTRL) && inputManager.isKeyPressed(SDLK_z)) {
-		if (blocks.empty()) {
-			return;
-		}
-
-		int lastNumberOfBlocks = blockNumber.top();
-
-		blocksErased.insert(blocksErased.begin() + blocksErased.size(), blocks.end() - lastNumberOfBlocks, blocks.end());
-		blocks.erase(blocks.end() - lastNumberOfBlocks, blocks.end());
-
-		blockNumber.pop();
-		blockNumberErased.push(lastNumberOfBlocks);
-
-		inputManager.releaseKey(SDLK_z);
-		return;
-	}
-	else if (inputManager.isKeyPressed(SDLK_LCTRL) && inputManager.isKeyPressed(SDLK_y)) {
-		if (blocksErased.empty()) {
-			return;
-		}
-
-		int lastNumberOfBlocksErased = blockNumberErased.top();
-
-		blocks.insert(blocks.begin() + blocks.size(), blocksErased.end() - lastNumberOfBlocksErased, blocksErased.end());
-		blocksErased.erase(blocksErased.end() - lastNumberOfBlocksErased, blocksErased.end());
-
-		blockNumberErased.pop();
-		blockNumber.push(lastNumberOfBlocksErased);
-
-		inputManager.releaseKey(SDLK_y);
-		return;
-	}*/
-	
-	player.update(inputManager);
 
 	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && inputManager.isMoving()) {
-		hudPanel.update(inputManager);
+		change = true;
+
+		if (hudPanel.update(inputManager)) {
+			drawHUD();
+		}
 
 		glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
 
@@ -205,59 +194,31 @@ void GUI::update() {
 					rect.x = x;
 					rect.y = y;
 
-					blocks.emplace_back(rect, GREEN);
-					numberOfInsertedBlocks += 1;
+					SDL_RenderFillRect(renderer, &rect);
 					break;
 				}
 				case 1: {
-					int rectWidth = 4 * UNIT_WIDTH / 10;
-					int rectHeight = rectWidth;
+					SDL_Rect rect;
 
-					int startX = mouseCoords.x - rectWidth / 2;
-					int startY = mouseCoords.y - rectHeight / 2;
+					rect.w = 4 * UNIT_WIDTH / 10;
+					rect.h = 4 * UNIT_HEIGHT / 10;
 
-					int rowNumber = rectWidth / 6;
-					int columnNumber = rowNumber;
+					rect.x = mouseCoords.x - rect.w / 2;
+					rect.y = mouseCoords.y - rect.h / 2;
 
-					for (int i = 0; i < rowNumber; i++) {
-						for (int j = 0; j < columnNumber; j++) {
-							SDL_Rect rect;
-
-							rect.w = UNIT_WIDTH / 10;
-							rect.h = UNIT_HEIGHT / 10;
-
-							rect.x = startX + j * rect.w;
-							rect.y = startY + i * rect.h;
-
-							blocks.emplace_back(rect, GREEN);
-						}
-					}
-
-					numberOfInsertedBlocks += rowNumber * columnNumber;
+					SDL_RenderFillRect(renderer, &rect);
 					break;
 				}
 				case 2: {
-					int startX = mouseCoords.x - UNIT_WIDTH / 2;
-					int startY = mouseCoords.y - UNIT_HEIGHT / 2;
+					SDL_Rect rect;
 
-					int rowNumber = UNIT_WIDTH / 6;
-					int columnNumber = rowNumber;
+					rect.w = UNIT_WIDTH;
+					rect.h = UNIT_HEIGHT;
 
-					for (int i = 0; i < rowNumber; i++) {
-						for (int j = 0; j < columnNumber; j++) {
-							SDL_Rect rect;
+					rect.x = mouseCoords.x - rect.w / 2;
+					rect.y = mouseCoords.y - rect.h / 2;
 
-							rect.w = UNIT_WIDTH / 10;
-							rect.h = UNIT_HEIGHT / 10;
-
-							rect.x = startX + j * rect.w;
-							rect.y = startY + i * rect.h;
-
-							blocks.emplace_back(rect, GREEN);
-						}
-					}
-
-					numberOfInsertedBlocks += rowNumber * columnNumber;
+					SDL_RenderFillRect(renderer, &rect);
 					break;
 				}
 				case 3: {
@@ -276,8 +237,7 @@ void GUI::update() {
 					rect.x = x;
 					rect.y = y;
 
-					blocks.emplace_back(rect, GREEN);
-					numberOfInsertedBlocks += 1;
+					SDL_RenderFillRect(renderer, &rect);
 					break;
 				}
 
@@ -290,40 +250,36 @@ void GUI::update() {
 	
 	
 	if (inputManager.isKeyPressed(SDL_BUTTON_RIGHT)) {
+		change = true;
+
 		glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
 
 		rubber.x = mouseCoords.x - rubber.w / 2;
 		rubber.y = mouseCoords.y - rubber.h / 2;
 
-		for (size_t i = 0; i < blocks.size(); i++) {
-			Block block = blocks[i];
-
-			if (Utils::squareCollision(rubber, *block.getBounds())) {
-				blocks.erase(blocks.begin() + i);
-			}
-		}
-
-		shouldDrawRubber = true;
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderFillRect(renderer, &rubber);
 	}
-	else {
-		shouldDrawRubber = false;
-	}
-
 }
 
-void GUI::draw() {
-	// clear screen
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+void GUI::initDraw() {
+	// draw background color
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderFillRect(renderer, nullptr);
 
-	drawText();
-	drawGrid();
-	drawBlocks();
-	drawPlayer();
-	drawRubber();
+	SDL_Texture* texture = loadTexture(TEST_IMAGE_PATH);
+
+	if (texture != nullptr) {
+		SDL_Rect position = {100, 100, 64, 64};
+
+		SDL_RenderCopy(renderer, texture, NULL, &position);
+	}
+
+	SDL_DestroyTexture(texture);
+
+	// draw hud
 	drawHUD();
 
-	// update SDL window
 	SDL_RenderPresent(renderer);
 }
 
@@ -338,26 +294,6 @@ void GUI::drawGrid() {
 	// draw horizontal line
 	for (size_t i = 0; i < HORIZONTAL_UNITS; i++) {
 		SDL_RenderDrawLine(renderer, 0, i * UNIT_HEIGHT, SCREEN_WIDTH, i * UNIT_HEIGHT);
-	}
-}
-
-void GUI::drawPlayer() {
-	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-	SDL_RenderFillRect(renderer, player.getBounds());
-}
-
-void GUI::drawBlocks() {
-	for (size_t i = 0; i < blocks.size(); i++) {
-		Color color = blocks[i].getColor();
-		SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
-		SDL_RenderFillRect(renderer, blocks[i].getBounds());
-	}
-}
-
-void GUI::drawRubber() {
-	if (shouldDrawRubber) {
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		SDL_RenderDrawRect(renderer, &rubber);
 	}
 }
 
@@ -396,50 +332,50 @@ void GUI::drawCircle(int originX, int originY, int radius) {
 
 		SDL_Rect rect;
 
-		rect.w = 1;
-		rect.h = 1;
+		rect.w = 3;
+		rect.h = 3;
 
 		rect.x = originX + x;
 		rect.y = originY + y;
 
-		blocks.emplace_back(rect, GREEN);
+		SDL_RenderFillRect(renderer, &rect);
 
 		rect.x = originX + x;
 		rect.y = originY - y;
 
-		blocks.emplace_back(rect, GREEN);
+		SDL_RenderFillRect(renderer, &rect);
 
 		rect.x = originX - x;
 		rect.y = originY + y;
 
-		blocks.emplace_back(rect, GREEN);
+		SDL_RenderFillRect(renderer, &rect);
 		
 		rect.x = originX - x;
 		rect.y = originY - y;
 		
-		blocks.emplace_back(rect, GREEN);
+		SDL_RenderFillRect(renderer, &rect);
 
 		// ====================================//
 
 		rect.x = originX - y;
 		rect.y = originY + x;
 
-		blocks.emplace_back(rect, GREEN);
+		SDL_RenderFillRect(renderer, &rect);
 
 		rect.x = originX + y;
 		rect.y = originY - x;
 
-		blocks.emplace_back(rect, GREEN);
+		SDL_RenderFillRect(renderer, &rect);
 
 		rect.x = originX - y;
 		rect.y = originY - x;
 
-		blocks.emplace_back(rect, GREEN);
+		SDL_RenderFillRect(renderer, &rect);
 
 		rect.x = originX + y;
 		rect.y = originY + x;
 
-		blocks.emplace_back(rect, GREEN);
+		SDL_RenderFillRect(renderer, &rect);
 
 		//SDL_RenderDrawPoint(renderer, originX + x, originY + y); // 1
 		//SDL_RenderDrawPoint(renderer, originX + x, originY - y); // 4
@@ -450,15 +386,11 @@ void GUI::drawCircle(int originX, int originY, int radius) {
 		//SDL_RenderDrawPoint(renderer, originX + y, originY - x); // 3
 		//SDL_RenderDrawPoint(renderer, originX - y, originY - x); // 6
 		//SDL_RenderDrawPoint(renderer, originX + y, originY + x); // 2
-
-		blocksAdded += 8;
 	}
-
-	numberOfInsertedBlocks += blocksAdded;
 }
 
 void GUI::drawText() {
-	drawText("Block number: " + std::to_string(blocks.size()), 0, 0);
+	drawText("Block number: ", 0, 0);
 	drawText("Eastwood", 100, 100);
 }
 
@@ -501,3 +433,33 @@ void GUI::drawText(SDL_Rect* position, std::string& text) {
 	}
 
 }
+
+void GUI::updateScreen() {
+	if (change) {
+		SDL_RenderPresent(renderer);
+		change = false;
+	}
+}
+
+SDL_Texture* GUI::loadTexture(std::string filePath) {
+	SDL_Texture* texture = nullptr;
+	
+	SDL_Surface* loadedSurface = IMG_Load(filePath.c_str());
+
+	if (loadedSurface == nullptr) {
+		std::cout << "Failed to load the image." << std::endl;
+		return nullptr;
+	}
+
+	texture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
+
+	if (texture == nullptr) {
+		std::cout << "Failed to load the texture from image." << std::endl;
+		return nullptr;
+	}
+
+	SDL_FreeSurface(loadedSurface);
+
+	return texture;
+}
+

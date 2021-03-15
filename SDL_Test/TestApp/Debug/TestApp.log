@@ -1,3 +1,5 @@
 ﻿  GUI.cpp
-D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\GUI.cpp(384,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\GUI.cpp(320,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  Main.cpp
+  Generating Code...
   TestApp.vcxproj -> D:\Users\Jovan\C++\SDL_Testing\SDL_Test\Debug\TestApp.exe
