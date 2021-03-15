@@ -33,6 +33,9 @@ static const int COLOR_BUTTON_HEIGHT = 20;
 static const int PANEL_BUTTON_WIDTH = 64;
 static const int PANEL_BUTTON_HEIGHT = 64;
 
+static const int COLOR_BUTTON_START_X = 20;
+static const int COLOR_BUTTON_START_Y = 20;
+
 static const int BUTTON_START_X = 2 * UNIT_WIDTH;
 static const int BUTTON_START_Y = 0;
 

@@ -9,6 +9,7 @@ class MainPanel
 {
 private:
 	Panel panel;
+	Panel colorButtonPanel;
 	std::vector<Button> colorButtons;
 	std::vector<Button> buttons;
 public:
@@ -18,6 +19,8 @@ public:
 	// init
 	void init();
 	void initComponents();
+	void initPanels();
+	void initColorButtons();
 
 	// update
 	bool update(InputManager inputManager);

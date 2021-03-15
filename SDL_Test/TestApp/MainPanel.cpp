@@ -7,6 +7,7 @@ MainPanel::MainPanel() {
 
 void MainPanel::init() {
 	initComponents();
+	initColorButtons();
 }
 
 void MainPanel::initComponents() {
@@ -34,6 +35,28 @@ void MainPanel::initComponents() {
 	}
 
 	buttons[0].setColor(RED);
+}
+
+void MainPanel::initPanels() {
+
+}
+
+void MainPanel::initColorButtons() {
+	colorButtons.reserve(COLOR_BUTTON_NUMBER);
+
+	for (size_t i = 1; i <= 2; i++) {
+		for (size_t j = 1; j <= COLOR_BUTTON_NUMBER; j++) {
+			SDL_Rect bounds;
+
+			bounds.w = COLOR_BUTTON_WIDTH;
+			bounds.h = COLOR_BUTTON_HEIGHT;
+
+			bounds.x = j * COLOR_BUTTON_START_X;
+			bounds.y = i * COLOR_BUTTON_START_Y;
+
+			colorButtons.emplace_back(bounds, GREEN);
+		}
+	}
 }
 
 bool MainPanel::update(InputManager inputManager) {
@@ -83,11 +106,12 @@ bool MainPanel::update(InputManager inputManager) {
 std::vector<HudBase> MainPanel::getComponents() {
 	std::vector<HudBase> components;
 
-	components.reserve(buttons.size() + 1);
+	components.reserve(buttons.size() + colorButtons.size() + 1);
 
 	components.push_back(panel);
 	
 	components.insert(components.begin() + 1, buttons.begin(), buttons.end());
+	components.insert(components.end(), colorButtons.begin(), colorButtons.end());
 
 	return components;
 }
