@@ -38,12 +38,12 @@ static const int PANEL_HEIGHT = UNIT_HEIGHT;
 static const int PANEL_X = 0;
 static const int PANEL_Y = SCREEN_HEIGHT - UNIT_HEIGHT;
 
-static const int BUTTON_NUMBER = 3;
+static const int BUTTON_NUMBER = 4;
 
 static const int PANEL_BUTTON_WIDTH = UNIT_WIDTH;
 static const int PANEL_BUTTON_HEIGHT = UNIT_HEIGHT;
 
-static const int BUTTON_START_X = 3 * UNIT_WIDTH;
+static const int BUTTON_START_X = 2 * UNIT_WIDTH;
 static const int BUTTON_START_Y = SCREEN_HEIGHT - UNIT_HEIGHT;
 
 static const int BUTTON_SAPWN_DIFF_X = 2 * UNIT_WIDTH;

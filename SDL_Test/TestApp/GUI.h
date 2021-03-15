@@ -1,11 +1,13 @@
 #pragma once
 #include "Player.h"
+#include "Block.h"
 #include "InputManager.h"
 #include "MainPanel.h"
 #include "HudBase.h"
 #include <SDL/SDL.h>
 #include <SDL_TTF/SDL_ttf.h>
 #include <vector>
+#include <stack>
 #include <string>
 
 class GUI
@@ -25,7 +27,11 @@ private:
 	SDL_Rect rubber;
 	MainPanel hudPanel;
 	TTF_Font* font;
-	std::vector<SDL_Rect> blocks;
+	std::vector<Block> blocks;
+	std::vector<Block> blocksErased;
+	std::stack<int> blockNumber;
+	std::stack<int> blockNumberErased;
+	int numberOfInsertedBlocks;
 	bool shouldDrawRubber;
 public:
 	GUI();
@@ -44,6 +50,7 @@ private:
 	void drawBlocks();
 	void drawRubber();
 	void drawHUD();
+	void drawCircle(int x, int y, int radius);
 	void drawText();
 	void drawText(std::string text, int x, int y);
 	void drawText(SDL_Rect* position, std::string& text);

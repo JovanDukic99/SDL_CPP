@@ -3,7 +3,7 @@
 #include "Utils.h"
 #include <iostream>
 
-GUI::GUI() : gameState(GameState::PLAY), player(START_PLAYER_X, START_PLAYER_X, UNIT_WIDTH, UNIT_HEIGHT), shouldDrawRubber(false) {
+GUI::GUI() : gameState(GameState::PLAY), player(START_PLAYER_X, START_PLAYER_X, UNIT_WIDTH, UNIT_HEIGHT), shouldDrawRubber(false), numberOfInsertedBlocks(0) {
 	init();
 }
 
@@ -127,6 +127,10 @@ void GUI::handleInputEvents() {
 			break;
 		}
 		case SDL_MOUSEBUTTONUP: {
+			if (event.button.button == SDL_BUTTON_LEFT) {
+				blockNumber.push(numberOfInsertedBlocks);
+				numberOfInsertedBlocks = 0;
+			}
 			inputManager.releaseKey(event.button.button);
 			break;
 		}
@@ -141,6 +145,38 @@ void GUI::update() {
 		gameState = GameState::EXIT;
 		return;	
 	}
+	/*else if (inputManager.isKeyPressed(SDLK_LCTRL) && inputManager.isKeyPressed(SDLK_z)) {
+		if (blocks.empty()) {
+			return;
+		}
+
+		int lastNumberOfBlocks = blockNumber.top();
+
+		blocksErased.insert(blocksErased.begin() + blocksErased.size(), blocks.end() - lastNumberOfBlocks, blocks.end());
+		blocks.erase(blocks.end() - lastNumberOfBlocks, blocks.end());
+
+		blockNumber.pop();
+		blockNumberErased.push(lastNumberOfBlocks);
+
+		inputManager.releaseKey(SDLK_z);
+		return;
+	}
+	else if (inputManager.isKeyPressed(SDLK_LCTRL) && inputManager.isKeyPressed(SDLK_y)) {
+		if (blocksErased.empty()) {
+			return;
+		}
+
+		int lastNumberOfBlocksErased = blockNumberErased.top();
+
+		blocks.insert(blocks.begin() + blocks.size(), blocksErased.end() - lastNumberOfBlocksErased, blocksErased.end());
+		blocksErased.erase(blocksErased.end() - lastNumberOfBlocksErased, blocksErased.end());
+
+		blockNumberErased.pop();
+		blockNumber.push(lastNumberOfBlocksErased);
+
+		inputManager.releaseKey(SDLK_y);
+		return;
+	}*/
 	
 	player.update(inputManager);
 
@@ -169,7 +205,8 @@ void GUI::update() {
 					rect.x = x;
 					rect.y = y;
 
-					blocks.push_back(rect);
+					blocks.emplace_back(rect, GREEN);
+					numberOfInsertedBlocks += 1;
 					break;
 				}
 				case 1: {
@@ -192,10 +229,11 @@ void GUI::update() {
 							rect.x = startX + j * rect.w;
 							rect.y = startY + i * rect.h;
 
-							blocks.push_back(rect);
+							blocks.emplace_back(rect, GREEN);
 						}
 					}
 
+					numberOfInsertedBlocks += rowNumber * columnNumber;
 					break;
 				}
 				case 2: {
@@ -215,10 +253,15 @@ void GUI::update() {
 							rect.x = startX + j * rect.w;
 							rect.y = startY + i * rect.h;
 
-							blocks.push_back(rect);
+							blocks.emplace_back(rect, GREEN);
 						}
 					}
 
+					numberOfInsertedBlocks += rowNumber * columnNumber;
+					break;
+				}
+				case 3: {
+					drawCircle(mouseCoords.x, mouseCoords.y, 60);
 					break;
 				}
 				default:
@@ -233,7 +276,8 @@ void GUI::update() {
 					rect.x = x;
 					rect.y = y;
 
-					blocks.push_back(rect);
+					blocks.emplace_back(rect, GREEN);
+					numberOfInsertedBlocks += 1;
 					break;
 				}
 
@@ -252,7 +296,9 @@ void GUI::update() {
 		rubber.y = mouseCoords.y - rubber.h / 2;
 
 		for (size_t i = 0; i < blocks.size(); i++) {
-			if (Utils::squareCollision(rubber, blocks[i])) {
+			Block block = blocks[i];
+
+			if (Utils::squareCollision(rubber, *block.getBounds())) {
 				blocks.erase(blocks.begin() + i);
 			}
 		}
@@ -301,9 +347,10 @@ void GUI::drawPlayer() {
 }
 
 void GUI::drawBlocks() {
-	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 	for (size_t i = 0; i < blocks.size(); i++) {
-		SDL_RenderFillRect(renderer, &blocks[i]);
+		Color color = blocks[i].getColor();
+		SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+		SDL_RenderFillRect(renderer, blocks[i].getBounds());
 	}
 }
 
@@ -323,6 +370,91 @@ void GUI::drawHUD() {
 		SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
 		SDL_RenderFillRect(renderer, base.getBounds());
 	}
+}
+
+void GUI::drawCircle(int originX, int originY, int radius) {
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+	int blocksAdded = 0;
+
+	int x = 0;
+	int y = radius;
+
+	// decision parameter
+	float p = 5/4 - radius;
+
+	while (x <= y) {
+		if (p < 0.0f) {
+			x++;
+			p += 2 * x + 2;
+		}
+		else {
+			y--;
+			x++;
+			p += 2 * (x - y) + 1;
+		}
+
+		SDL_Rect rect;
+
+		rect.w = 1;
+		rect.h = 1;
+
+		rect.x = originX + x;
+		rect.y = originY + y;
+
+		blocks.emplace_back(rect, GREEN);
+
+		rect.x = originX + x;
+		rect.y = originY - y;
+
+		blocks.emplace_back(rect, GREEN);
+
+		rect.x = originX - x;
+		rect.y = originY + y;
+
+		blocks.emplace_back(rect, GREEN);
+		
+		rect.x = originX - x;
+		rect.y = originY - y;
+		
+		blocks.emplace_back(rect, GREEN);
+
+		// ====================================//
+
+		rect.x = originX - y;
+		rect.y = originY + x;
+
+		blocks.emplace_back(rect, GREEN);
+
+		rect.x = originX + y;
+		rect.y = originY - x;
+
+		blocks.emplace_back(rect, GREEN);
+
+		rect.x = originX - y;
+		rect.y = originY - x;
+
+		blocks.emplace_back(rect, GREEN);
+
+		rect.x = originX + y;
+		rect.y = originY + x;
+
+		blocks.emplace_back(rect, GREEN);
+
+		//SDL_RenderDrawPoint(renderer, originX + x, originY + y); // 1
+		//SDL_RenderDrawPoint(renderer, originX + x, originY - y); // 4
+		//SDL_RenderDrawPoint(renderer, originX - x, originY + y); // 8
+		//SDL_RenderDrawPoint(renderer, originX - x, originY - y); // 5
+
+		//SDL_RenderDrawPoint(renderer, originX - y, originY + x); // 7
+		//SDL_RenderDrawPoint(renderer, originX + y, originY - x); // 3
+		//SDL_RenderDrawPoint(renderer, originX - y, originY - x); // 6
+		//SDL_RenderDrawPoint(renderer, originX + y, originY + x); // 2
+
+		blocksAdded += 8;
+	}
+
+	numberOfInsertedBlocks += blocksAdded;
 }
 
 void GUI::drawText() {
