@@ -1,5 +1,6 @@
 #include "InputManager.h"
 
+// setters
 void InputManager::pressKey(unsigned int keyID) {
 	keyMap[keyID] = true;
 }
@@ -16,7 +17,16 @@ void InputManager::setMoving(bool moving) {
 	this->moving = moving;
 }
 
-glm::ivec2 InputManager::getMouseCoordinates() {
+void InputManager::setClickNumber(int clickNumber) {
+	this->clickNumber = clickNumber;
+}
+
+void InputManager::setWindowID(int widowID) {
+	this->windowID = windowID;
+}
+
+// getters
+glm::ivec2 InputManager::getMouseCoordinates() const {
 	return mouseCoordinates;
 }
 
@@ -30,6 +40,14 @@ bool InputManager::isKeyPressed(unsigned int keyID) {
 	return false;
 }
 
-bool InputManager::isMoving() {
+bool InputManager::isDoubleClick() const {
+	return clickNumber == 2;
+}
+
+int InputManager::getWindowID() const {
+	return windowID;
+}
+
+bool InputManager::isMoving() const {
 	return moving;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "InputManager.h"
 #include "Component.h"
+#include "ColorPicker.h"
 #include <SDL/SDL.h>
 #include <SDL/SDL_render.h>
 #include <vector>
@@ -13,7 +14,7 @@ private:
 	std::vector<Component> colorButtons;
 	std::vector<Component> brushButtons;
 	int brushSize;
-	Color color;
+	Color selectedColor;
 	SDL_Renderer* renderer;
 public:
 	// constructors
@@ -24,6 +25,7 @@ public:
 
 	// update
 	bool update(InputManager inputManager);
+	bool openColorPicker(InputManager inputManager);
 
 	// getters
 	std::vector<Component> getPanels() const;

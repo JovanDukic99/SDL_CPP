@@ -1,6 +1,7 @@
 #pragma once
 #include "InputManager.h"
 #include "MainPanel.h"
+#include "ColorPicker.h"
 #include <SDL/SDL.h>
 #include <SDL_TTF/SDL_ttf.h>
 #include <SDL_IMAGE/SDL_image.h>
@@ -17,10 +18,10 @@ private:
 	};
 private:
 	SDL_Window* window;
-	SDL_Surface* surface;
 	SDL_Renderer* renderer;
 	GameState gameState;
 	InputManager inputManager;
+	ColorPicker colorPicker;
 	SDL_Rect rubber;
 	MainPanel mainPanel;
 	TTF_Font* font;
@@ -36,9 +37,10 @@ private:
 	void initComponents();
 	void run();
 	void handleInputEvents();
+	void handleWindowEvents(SDL_Event& event);
 	void update();
+	bool updateColorPicker();
 	void initDraw();
-	void drawGrid();
 	void drawHUD();
 	void drawCircle(int x, int y, int radius);
 	void drawText();

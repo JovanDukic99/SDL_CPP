@@ -6,6 +6,11 @@ static const std::string TITLE = "Game";
 static const int SCREEN_WIDTH = 1080;
 static const int SCREEN_HEIGHT = 720;
 
+// color picker screen config
+static const std::string COLOR_PICKER = "Color picker";
+static const int COLOR_PICKER_WIDTH = 500;
+static const int COLOR_PICKER_HEIGHT = 500;
+
 // world config
 static const int UNIT_WIDTH = 60;
 static const int UNIT_HEIGHT = 60;
@@ -25,7 +30,7 @@ static const int MAIN_PANEL_START_X = 0;
 static const int MAIN_PANEL_START_Y = 0;
 
 // color button config
-static const int COLOR_BUTTON_NUMBER = 20;
+static const int COLOR_BUTTON_NUMBER = 21;
 
 static const int COLOR_BUTTON_WIDTH = 20;
 static const int COLOR_BUTTON_HEIGHT = 20;
@@ -42,6 +47,13 @@ static const int COLOR_PANEL_HEIGHT = COLOR_BUTTON_NUMBER * 2 + 15;
 static const int COLOR_PANEL_START_X = 20;
 static const int COLOR_PANEL_START_Y = 20;
 
+// current color panel
+static const int CURRENT_COLOR_PANEL_START_X = COLOR_PANEL_WIDTH + COLOR_BUTTON_OFFSET - 5;
+static const int CURRENT_COLOR_PANEL_START_Y = COLOR_PANEL_START_Y + COLOR_BUTTON_OFFSET / 2;
+
+static const int CURRENT_COLOR_PANEL_WIDTH = COLOR_BUTTON_OFFSET;
+static const int CURRENT_COLOR_PANEL_HEIGHT = COLOR_BUTTON_OFFSET + 5;
+
 // button confit
 static const int PANEL_BUTTON_WIDTH = 64;
 static const int PANEL_BUTTON_HEIGHT = 64;
@@ -55,6 +67,38 @@ static const int BUTTON_SAPWN_DIFF_Y = UNIT_HEIGHT;
 // texture config
 static const std::string MINUS_BUTTON_PATH = "Assets/Textures/minus_button.png";
 static const std::string PLUS_BUTTON_PATH = "Assets/Textures/plus_button.png";
+
+// color picker config
+static const int COLOR_PICKER_COLOR_PANEL_WIDTH = 400;
+static const int COLOR_PICKER_COLOR_PANEL_HEIGHT = 150;
+
+static const int COLOR_PICKER_COLOR_PANEL_START_X = 50;
+static const int COLOR_PICKER_COLOR_PANEL_START_Y = 50;
+
+// color picker interval config
+static const int COLOR_INTERVAL_HORIZONTAL_OFFSET = 50;
+
+static const int COLOR_INTERVAL_START_X = 50;
+static const int COLOR_INTERVAL_START_Y = COLOR_PICKER_COLOR_PANEL_START_Y + COLOR_PICKER_COLOR_PANEL_HEIGHT + COLOR_INTERVAL_HORIZONTAL_OFFSET;
+
+static const int COLOR_INTERVAL_END_X = COLOR_INTERVAL_START_X + COLOR_PICKER_COLOR_PANEL_WIDTH;
+static const int COLOR_INTERVAL_END_Y = COLOR_INTERVAL_START_Y;
+
+// toogle button config
+static const int TOGGLE_BUTTON_WIDTH = 5;
+static const int TOGGLE_BUTTON_HEIGHT = 10;
+
+// red toggle button config
+static const int RED_TOGGLE_BUTTON_START_X = COLOR_INTERVAL_START_X;
+static const int RED_TOGGLE_BUTTON_START_Y = COLOR_INTERVAL_START_Y;
+
+// green toggle button config
+static const int GREEN_TOGGLE_BUTTON_START_X = COLOR_INTERVAL_START_X;
+static const int GREEN_TOGGLE_BUTTON_START_Y = COLOR_INTERVAL_START_Y + COLOR_INTERVAL_HORIZONTAL_OFFSET;
+
+// blue toggle button config
+static const int BLUE_TOGGLE_BUTTON_START_X = COLOR_INTERVAL_START_X;
+static const int BLUE_TOGGLE_BUTTON_START_Y = COLOR_INTERVAL_START_Y + 2 * COLOR_INTERVAL_HORIZONTAL_OFFSET;
 
 // brush config
 static const int BRUSH_INCREMENT = 1;

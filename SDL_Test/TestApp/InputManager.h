@@ -7,13 +7,22 @@ private:
 	std::unordered_map<unsigned int, bool> keyMap;
 	glm::ivec2 mouseCoordinates;
 	bool moving;
+	int clickNumber;
+	int windowID;
 public:
+	// setters
 	void pressKey(unsigned int keyID);
 	void releaseKey(unsigned int keyID);
 	void setMouseCoordinates(int x, int y);
 	void setMoving(bool moving);
-	glm::ivec2 getMouseCoordinates();
+	void setClickNumber(int clickNumber);
+	void setWindowID(int widowID);
+
+	// getters
+	glm::ivec2 getMouseCoordinates() const;
 	bool isKeyPressed(unsigned int keyID);
-	bool isMoving();
+	bool isMoving() const;
+	bool isDoubleClick() const;
+	int getWindowID() const;
 };
 

@@ -53,12 +53,6 @@ void GUI::initSDL() {
 		return;
 	}
 
-	// init surface
-	if ((surface = SDL_GetWindowSurface(window)) == nullptr) {
-		std::cout << "Could not initialize SDL_Surface." << std::endl;
-		return;
-	}
-
 	// init renderer
 	if ((renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC)) == nullptr) {
 		std::cout << "Could not initialize SDL_Renderer." << std::endl;
@@ -137,9 +131,14 @@ void GUI::handleInputEvents() {
 			gameState = GameState::EXIT;
 			break;
 		}
+		case SDL_WINDOWEVENT: {
+			handleWindowEvents(event);
+			break;
+		}
 		case SDL_MOUSEMOTION: {
 			inputManager.setMoving(true);
 			inputManager.setMouseCoordinates(event.motion.x, event.motion.y);
+			inputManager.setWindowID(event.window.windowID);
 			break;
 		}
 		case SDL_KEYDOWN: {
@@ -152,10 +151,13 @@ void GUI::handleInputEvents() {
 		}
 		case SDL_MOUSEBUTTONDOWN: {
 			inputManager.pressKey(event.button.button);
+			inputManager.setClickNumber(event.button.clicks);
+			inputManager.setWindowID(event.window.windowID);
 			break;
 		}
 		case SDL_MOUSEBUTTONUP: {
 			inputManager.releaseKey(event.button.button);
+			inputManager.setWindowID(event.window.windowID);
 			break;
 		}
 		default:
@@ -164,23 +166,51 @@ void GUI::handleInputEvents() {
 	}
 }
 
+void GUI::handleWindowEvents(SDL_Event& event) {
+	switch (event.window.event)
+	{
+	case SDL_WINDOWEVENT_CLOSE: {
+		if (event.window.windowID != SDL_GetWindowID(window)) {
+			colorPicker.closeWindow();
+		}
+		break;
+	}
+	default:
+		break;
+	}
+}
+
 void GUI::update() {
+	glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
+
 	if (inputManager.isKeyPressed(SDLK_ESCAPE)) {
 		gameState = GameState::EXIT;
 		return;	
 	}
 
+	// should open colorPicker
+	if (!colorPicker.isVisible() && mainPanel.openColorPicker(inputManager)) {
+		colorPicker.init();
+		return;
+	}
+
+	// update colorPicker
+	if (updateColorPicker()) {
+		return;
+	}
+
 	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
-		if (mainPanel.update(inputManager)) {
-			drawHUD();
-			inputManager.releaseKey(SDL_BUTTON_LEFT);
+		if (mouseCoords.y < 2 * UNIT_HEIGHT) {
+			if (mainPanel.update(inputManager)) {
+				change = true;
+				drawHUD();
+				inputManager.releaseKey(SDL_BUTTON_LEFT);
+			}
 		}
 	}
 
 	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && inputManager.isMoving()) {
 		change = true;
-
-		glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
 
 		if (mouseCoords.y >  2 * UNIT_HEIGHT) {
 			int brushSize = mainPanel.getBrushSize();
@@ -212,6 +242,16 @@ void GUI::update() {
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderFillRect(renderer, &rubber);
 	}
+
+	inputManager.setClickNumber(0);
+}
+
+bool GUI::updateColorPicker() {
+	if (inputManager.getWindowID() != SDL_GetWindowID(window) && colorPicker.isVisible()) {
+		colorPicker.update(inputManager);
+		return true;
+	}
+	return false;
 }
 
 void GUI::initDraw() {
@@ -223,20 +263,6 @@ void GUI::initDraw() {
 	drawHUD();
 
 	SDL_RenderPresent(renderer);
-}
-
-void GUI::drawGrid() {
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-	// draw vertical lines
-	for (size_t i = 0; i < VERTICAL_UNITS; i++) {
-		SDL_RenderDrawLine(renderer, i * UNIT_WIDTH, 0, i * UNIT_WIDTH, SCREEN_HEIGHT);
-	}
-
-	// draw horizontal line
-	for (size_t i = 0; i < HORIZONTAL_UNITS; i++) {
-		SDL_RenderDrawLine(renderer, 0, i * UNIT_HEIGHT, SCREEN_WIDTH, i * UNIT_HEIGHT);
-	}
 }
 
 void GUI::drawHUD() {
@@ -341,16 +367,6 @@ void GUI::drawCircle(int originX, int originY, int radius) {
 		rect.y = originY + x;
 
 		SDL_RenderFillRect(renderer, &rect);
-
-		//SDL_RenderDrawPoint(renderer, originX + x, originY + y); // 1
-		//SDL_RenderDrawPoint(renderer, originX + x, originY - y); // 4
-		//SDL_RenderDrawPoint(renderer, originX - x, originY + y); // 8
-		//SDL_RenderDrawPoint(renderer, originX - x, originY - y); // 5
-
-		//SDL_RenderDrawPoint(renderer, originX - y, originY + x); // 7
-		//SDL_RenderDrawPoint(renderer, originX + y, originY - x); // 3
-		//SDL_RenderDrawPoint(renderer, originX - y, originY - x); // 6
-		//SDL_RenderDrawPoint(renderer, originX + y, originY + x); // 2
 	}
 }
 

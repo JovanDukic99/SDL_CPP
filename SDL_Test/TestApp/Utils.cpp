@@ -21,6 +21,15 @@ bool Utils::areColliding(SDL_Rect r1, SDL_Rect r2) {
     return true;
 }
 
+bool Utils::isPointInsideBounds(glm::ivec2 mouseCoords, SDL_Rect bounds) {
+    if (mouseCoords.x >= bounds.x && mouseCoords.x <= bounds.x + bounds.w) {
+        if (mouseCoords.y >= bounds.y && mouseCoords.y <= bounds.y + bounds.h) {
+            return true;
+        }
+    }
+    return false;
+}
+
 Color Utils::getButtonColor(int index) {
     switch (index)
     {

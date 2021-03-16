@@ -1,3 +1,2 @@
-﻿  GUI.cpp
-D:\Users\Jovan\c++\SDL_Testing\SDL_Test\TestApp\GUI.cpp(285,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-  TestApp.vcxproj -> D:\Users\Jovan\c++\SDL_Testing\SDL_Test\Debug\TestApp.exe
+﻿  ColorPicker.cpp
+  TestApp.vcxproj -> D:\Users\Jovan\C++\SDL_Testing\SDL_Test\Debug\TestApp.exe

@@ -2,8 +2,9 @@
 #include "Config.h"
 #include "Utils.h"
 #include "ImageLoader.h"
+#include <iostream>
 
-MainPanel::MainPanel() : brushSize(1) {
+MainPanel::MainPanel() : brushSize(1), renderer(nullptr) {
 	
 }
 
@@ -39,6 +40,17 @@ void MainPanel::initPanels() {
 	colorPanelBounds.y = COLOR_PANEL_START_Y;
 
 	panels.emplace_back(colorPanelBounds, GRAY);
+
+	// ================= <Current Color Panel> ================= //
+	SDL_Rect currentColorPanel;
+
+	currentColorPanel.w = CURRENT_COLOR_PANEL_WIDTH;
+	currentColorPanel.h = CURRENT_COLOR_PANEL_HEIGHT;
+
+	currentColorPanel.x = CURRENT_COLOR_PANEL_START_X;
+	currentColorPanel.y = CURRENT_COLOR_PANEL_START_Y;
+
+	panels.emplace_back(currentColorPanel, GRAY);
 }
 
 void MainPanel::initButtons() {
@@ -46,7 +58,7 @@ void MainPanel::initButtons() {
 	colorButtons.reserve(COLOR_BUTTON_NUMBER);
 
 	for (size_t i = 0; i < 2; i++) {
-		for (size_t j = 0; j < COLOR_BUTTON_NUMBER / 2; j++) {
+		for (size_t j = 0; j < (COLOR_BUTTON_NUMBER - 1) / 2; j++) {
 			SDL_Rect bounds;
 
 			bounds.w = COLOR_BUTTON_WIDTH;
@@ -58,6 +70,17 @@ void MainPanel::initButtons() {
 			colorButtons.emplace_back(bounds, Utils::getButtonColor(i * COLOR_BUTTON_NUMBER / 2 + j));
 		}
 	}
+
+	// ================= <Current Color Button> ================= //
+	SDL_Rect bounds;
+
+	bounds.w = COLOR_BUTTON_WIDTH;
+	bounds.h = COLOR_BUTTON_HEIGHT;
+
+	bounds.x = COLOR_BUTTON_START_X + (COLOR_BUTTON_NUMBER / 2) * COLOR_BUTTON_OFFSET;
+	bounds.y = COLOR_BUTTON_START_Y + COLOR_BUTTON_OFFSET / 2;
+
+	colorButtons.emplace_back(bounds, BLACK);
 
 	// ================= <Brush Buttons> ================= //
 	brushButtons.reserve(2);
@@ -82,46 +105,41 @@ void MainPanel::initButtons() {
 	}
 }
 
+// update functions
 bool MainPanel::update(InputManager inputManager) {
 	return updateColorButtons(inputManager) || updateBrushButtons(inputManager);
 }
 
+bool MainPanel::openColorPicker(InputManager inputManager) {
+	if (Utils::isPointInsideBounds(inputManager.getMouseCoordinates(), colorButtons[colorButtons.size() - 1].getBounds()) && inputManager.isDoubleClick()) {
+		return true;
+	}
+	return false;
+}
+
 bool MainPanel::updateColorButtons(InputManager inputManager) {
-	glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
-
 	for (size_t i = 0; i < colorButtons.size(); i++) {
-		SDL_Rect bounds = colorButtons[i].getBounds();
-
-		if (mouseCoords.x >= bounds.x && mouseCoords.x <= bounds.x + bounds.w) {
-			if (mouseCoords.y >= bounds.y && mouseCoords.y <= bounds.y + bounds.h) {
-				color = colorButtons[i].getColor();
-				return true;
-			}
+		if (Utils::isPointInsideBounds(inputManager.getMouseCoordinates(), colorButtons[i].getBounds())) {
+			selectedColor = colorButtons[i].getColor();
+			colorButtons[colorButtons.size() - 1].setColor(selectedColor);
+			return true;
 		}
 	}
-
 	return false;
 }
 
 bool MainPanel::updateBrushButtons(InputManager inputManager) {
-	glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
-
 	for (size_t i = 0; i < brushButtons.size(); i++) {
-		SDL_Rect bounds = brushButtons[i].getBounds();
-
-		if (mouseCoords.x >= bounds.x && mouseCoords.x <= bounds.x + bounds.w) {
-			if (mouseCoords.y >= bounds.y && mouseCoords.y <= bounds.y + bounds.h) {
-				if (brushButtons[i].getID() == 0) {
-					brushSize = glm::clamp(brushSize + BRUSH_INCREMENT, 1, 10);
-				}
-				else {
-					brushSize = glm::clamp(brushSize - BRUSH_INCREMENT, 1, 10);
-				}
-				return true;
+		if (Utils::isPointInsideBounds(inputManager.getMouseCoordinates(), brushButtons[i].getBounds())) {
+			if (brushButtons[i].getID() == 0) {
+				brushSize = glm::clamp(brushSize + BRUSH_INCREMENT, 1, 10);
 			}
+			else {
+				brushSize = glm::clamp(brushSize - BRUSH_INCREMENT, 1, 10);
+			}
+			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -143,7 +161,7 @@ int MainPanel::getBrushSize() const {
 }
 
 Color MainPanel::getSelectedColor() const {
-	return color;
+	return selectedColor;
 }
 
 // setters
