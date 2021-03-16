@@ -21,7 +21,7 @@ void InputManager::setClickNumber(int clickNumber) {
 	this->clickNumber = clickNumber;
 }
 
-void InputManager::setWindowID(int widowID) {
+void InputManager::setWindowID(unsigned int windowID) {
 	this->windowID = windowID;
 }
 
@@ -44,7 +44,7 @@ bool InputManager::isDoubleClick() const {
 	return clickNumber == 2;
 }
 
-int InputManager::getWindowID() const {
+unsigned int InputManager::getWindowID() const {
 	return windowID;
 }
 

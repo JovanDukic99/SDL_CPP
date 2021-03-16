@@ -168,3 +168,8 @@ Color MainPanel::getSelectedColor() const {
 void MainPanel::setRenderer(SDL_Renderer* renderer) {
 	this->renderer = renderer;
 }
+
+void MainPanel::setSelectedColor(Color selectedColor) {
+	colorButtons[colorButtons.size() - 1].setColor(selectedColor);
+	this->selectedColor = selectedColor;
+}

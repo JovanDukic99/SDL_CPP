@@ -64,9 +64,10 @@ static const int BUTTON_START_Y = 25;
 static const int BUTTON_SAPWN_DIFF_X = 2 * UNIT_WIDTH;
 static const int BUTTON_SAPWN_DIFF_Y = UNIT_HEIGHT;
 
-// texture config
+// asset config
 static const std::string MINUS_BUTTON_PATH = "Assets/Textures/minus_button.png";
 static const std::string PLUS_BUTTON_PATH = "Assets/Textures/plus_button.png";
+static const std::string FONT_PATH = "fonts/Roboto-Light.ttf";
 
 // color picker config
 static const int COLOR_PICKER_COLOR_PANEL_WIDTH = 400;
@@ -84,6 +85,9 @@ static const int COLOR_INTERVAL_START_Y = COLOR_PICKER_COLOR_PANEL_START_Y + COL
 static const int COLOR_INTERVAL_END_X = COLOR_INTERVAL_START_X + COLOR_PICKER_COLOR_PANEL_WIDTH;
 static const int COLOR_INTERVAL_END_Y = COLOR_INTERVAL_START_Y;
 
+static const int COLOR_INTERVAL_WIDTH = COLOR_INTERVAL_END_X - COLOR_INTERVAL_START_X;
+static const int COLOR_RGB_MAX = 255;
+
 // toogle button config
 static const int TOGGLE_BUTTON_WIDTH = 5;
 static const int TOGGLE_BUTTON_HEIGHT = 10;
@@ -99,6 +103,22 @@ static const int GREEN_TOGGLE_BUTTON_START_Y = COLOR_INTERVAL_START_Y + COLOR_IN
 // blue toggle button config
 static const int BLUE_TOGGLE_BUTTON_START_X = COLOR_INTERVAL_START_X;
 static const int BLUE_TOGGLE_BUTTON_START_Y = COLOR_INTERVAL_START_Y + 2 * COLOR_INTERVAL_HORIZONTAL_OFFSET;
+
+// label config
+static const int LABEL_PADDING = 40;
+static const int LABEL_OFFSET = 50;
+
+static const int LABEL_START_X = (COLOR_INTERVAL_START_X + COLOR_INTERVAL_END_X) / 2;
+static const int LABEL_START_Y = COLOR_INTERVAL_START_Y - LABEL_PADDING;
+
+// submit button config
+static const std::string SUBMIT_BUTTON = "Submit";
+
+static const int SUBMIT_BUTTON_WIDTH = 100 + 10;
+static const int SUBMIT_BUTTON_HEIGHT = 40 + 10;
+
+static const int SUBMIT_BUTTON_START_X = (COLOR_PICKER_WIDTH - SUBMIT_BUTTON_WIDTH) / 2 - 5;
+static const int SUBMIT_BUTTON_START_Y = COLOR_PICKER_HEIGHT - SUBMIT_BUTTON_HEIGHT - 20;
 
 // brush config
 static const int BRUSH_INCREMENT = 1;

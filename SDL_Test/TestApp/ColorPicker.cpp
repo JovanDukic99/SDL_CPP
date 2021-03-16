@@ -1,30 +1,22 @@
 #include "ColorPicker.h"
 #include "Config.h"
 #include "Utils.h"
+#include "ImageLoader.h"
 #include <glm/glm.hpp>
 #include <iostream>
 
-ColorPicker::ColorPicker() : window(nullptr), renderer(nullptr), visible(false), clickedRed(false), clickedGreen(false), clickedBlue(false) {
+ColorPicker::ColorPicker() : window(nullptr), renderer(nullptr), font(nullptr), visible(false), clickedRed(false), clickedGreen(false), clickedBlue(false), clickedSubmit(false), hasReset(true), redLabel("0"), greenLabel("0"), blueLabel("0") {
 
 }
 
 ColorPicker::~ColorPicker() {
-	if (window != nullptr) {
-		SDL_DestroyWindow(window);
-		window = nullptr;
-	}
-
-	if (renderer != nullptr) {
-		SDL_DestroyRenderer(renderer);
-		renderer = nullptr;
-	}
-
-	setVisible(false);
+	resetClass();
 }
 
-void ColorPicker::init() {
+void ColorPicker::init(Color color) {
 	initWindow();
-	initComponents();
+	initComponents(color);
+	initFont();
 	draw();
 	setVisible(true);
 }
@@ -32,7 +24,7 @@ void ColorPicker::init() {
 void ColorPicker::initWindow() {
 	// create window
 	if (window == nullptr) {
-		window = SDL_CreateWindow(COLOR_PICKER.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, COLOR_PICKER_WIDTH, COLOR_PICKER_HEIGHT, SDL_WINDOW_SHOWN);
+		window = SDL_CreateWindow(COLOR_PICKER.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, COLOR_PICKER_WIDTH, COLOR_PICKER_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_ALWAYS_ON_TOP);
 	}
 
 	if (window == nullptr) {
@@ -51,7 +43,7 @@ void ColorPicker::initWindow() {
 	}
 }
 
-void ColorPicker::initComponents() {
+void ColorPicker::initComponents(Color color) {
 	// init colorPanel bounds
 	SDL_Rect colorPanelBounds;
 
@@ -61,7 +53,7 @@ void ColorPicker::initComponents() {
 	colorPanelBounds.x = COLOR_PICKER_COLOR_PANEL_START_X;
 	colorPanelBounds.y = COLOR_PICKER_COLOR_PANEL_START_Y;
 
-	colorPanel.init(colorPanelBounds, BLACK);
+	colorPanel.init(colorPanelBounds, color);
 
 	// init red toggleButton
 	SDL_Rect toggleBounds;
@@ -69,46 +61,106 @@ void ColorPicker::initComponents() {
 	toggleBounds.w = TOGGLE_BUTTON_WIDTH;
 	toggleBounds.h = TOGGLE_BUTTON_HEIGHT;
 
-	toggleBounds.x = RED_TOGGLE_BUTTON_START_X;
+	toggleBounds.x = Utils::calculatePositionFromRGBValue(COLOR_INTERVAL_START_X, COLOR_INTERVAL_WIDTH, COLOR_RGB_MAX, color.getR());
 	toggleBounds.y = RED_TOGGLE_BUTTON_START_Y - toggleBounds.h / 2;
 
 	toggleRed.init(toggleBounds, BLACK);
 
 	// init green toggleButton
-	toggleBounds.x = GREEN_TOGGLE_BUTTON_START_X;
+	toggleBounds.x = toggleBounds.x = Utils::calculatePositionFromRGBValue(COLOR_INTERVAL_START_X, COLOR_INTERVAL_WIDTH, COLOR_RGB_MAX, color.getG());
 	toggleBounds.y = GREEN_TOGGLE_BUTTON_START_Y - toggleBounds.h / 2;
 
 	toggleGreen.init(toggleBounds, BLACK);
 
 	// init blue toogleButton
-	toggleBounds.x = BLUE_TOGGLE_BUTTON_START_X;
+	toggleBounds.x = toggleBounds.x = Utils::calculatePositionFromRGBValue(COLOR_INTERVAL_START_X, COLOR_INTERVAL_WIDTH, COLOR_RGB_MAX, color.getB());
 	toggleBounds.y = BLUE_TOGGLE_BUTTON_START_Y - toggleBounds.h / 2;
 
 	toggleBlue.init(toggleBounds, BLACK);
+
+	// init submit button
+	SDL_Rect submitBounds;
+
+	submitBounds.w = SUBMIT_BUTTON_WIDTH;
+	submitBounds.h = SUBMIT_BUTTON_HEIGHT;
+
+	submitBounds.x = SUBMIT_BUTTON_START_X;
+	submitBounds.y = SUBMIT_BUTTON_START_Y;
+
+	submitButton.init(submitBounds, SILVER);
+
+	// init factors
+	redLabel = std::to_string(color.getR());
+	greenLabel = std::to_string(color.getG());
+	blueLabel = std::to_string(color.getB());
+	setColor(color);
+}
+
+void ColorPicker::initFont() {
+	if (font == nullptr) {
+		if ((font = TTF_OpenFont(FONT_PATH.c_str(), 28)) == nullptr) {
+			std::cout << "TTF_OpenFont has failed." << std::endl;
+			return;
+		}
+		TTF_GlyphMetrics(font, 'g', &xMin1, &xMax1, &yMin1, &yMax1, &advance1);
+		printf("minx    : %d\n", xMin1);
+		printf("maxx    : %d\n", xMax1);
+		printf("miny    : %d\n", yMin1);
+		printf("maxy    : %d\n", yMax1);
+		printf("advance : %d\n", advance1);
+	}
+
+	if (submitFont == nullptr) {
+		if ((submitFont = TTF_OpenFont(FONT_PATH.c_str(), 72)) == nullptr) {
+			std::cout << "TTF_OpenFont has failed." << std::endl;
+			return;
+		}
+		TTF_GlyphMetrics(submitFont, 'g', &xMin2, &xMax2, &yMin2, &yMax2, &advance2);
+		printf("\nminx    : %d\n", xMin2);
+		printf("maxx    : %d\n", xMax2);
+		printf("miny    : %d\n", yMin2);
+		printf("maxy    : %d\n", yMax2);
+		printf("advance : %d\n", advance2);
+	}
 }
 
 // update
 void ColorPicker::update(InputManager inputManager) {
-	glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
+	if (inputManager.getWindowID() != SDL_GetWindowID(window)) {
+		return;
+	}
 
 	if (!inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
 		reset();
 		return;
 	}
 
+	glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
+
 	// check if user is scrolling left or right
 	if (clickedRed == true) {
 		updateToggleButton(mouseCoords, &toggleRed);
+		updateColor(mouseCoords, Factor::R);
+		updateColorPanel();
 		draw();
 		return;
 	}
 	else if (clickedGreen == true) {
 		updateToggleButton(mouseCoords, &toggleGreen);
+		updateColor(mouseCoords, Factor::G);
+		updateColorPanel();
 		draw();
 		return;
 	}
 	else if (clickedBlue == true) {
 		updateToggleButton(mouseCoords, &toggleBlue);
+		updateColor(mouseCoords, Factor::B);
+		updateColorPanel();
+		draw();
+		return;
+	}
+	else if (clickedSubmit == true) {
+		submitButton.setColor(GRAY);
 		draw();
 		return;
 	}
@@ -116,26 +168,67 @@ void ColorPicker::update(InputManager inputManager) {
 	// update toggleRed
 	if (Utils::isPointInsideBounds(mouseCoords, toggleRed.getBounds())) {
 		clickedRed = true;
+		hasReset = false;
 		return;
 	}
 
 	// update toggleGreen
 	if (Utils::isPointInsideBounds(mouseCoords, toggleGreen.getBounds())) {
 		clickedGreen = true;
+		hasReset = false;
 		return;
 	}
 
 	// update toggleBlue
 	if (Utils::isPointInsideBounds(mouseCoords, toggleBlue.getBounds())) {
 		clickedBlue = true;
+		hasReset = false;
 		return;
 	}
+
+	if (Utils::isPointInsideBounds(mouseCoords, submitButton.getBounds())) {
+		clickedSubmit = true;
+		hasReset = false;
+		return;
+	}
+
 }
 
 void ColorPicker::updateToggleButton(glm::ivec2 mouseCoords, Component* toggleButton) {
 	SDL_Rect bounds = toggleButton->getBounds();
-	bounds.x = mouseCoords.x - bounds.w / 2;
+	bounds.x = glm::clamp(mouseCoords.x - bounds.w / 2, COLOR_INTERVAL_START_X, COLOR_INTERVAL_END_X);
 	toggleButton->setBounds(bounds);
+}
+
+void ColorPicker::updateColor(glm::ivec2 mouseCoords, Factor factor) {
+	mouseCoords.x = glm::clamp(mouseCoords.x, COLOR_INTERVAL_START_X, COLOR_INTERVAL_END_X);
+	switch (factor)
+	{
+	case Factor::R: {
+		int value = Utils::calculateRGBValueFromPositon(mouseCoords.x, COLOR_INTERVAL_START_X, COLOR_INTERVAL_WIDTH, COLOR_RGB_MAX);
+		color.setR(value);
+		redLabel = std::to_string(value);
+		break;
+	}
+	case Factor::G: {
+		int value = Utils::calculateRGBValueFromPositon(mouseCoords.x, COLOR_INTERVAL_START_X, COLOR_INTERVAL_WIDTH, COLOR_RGB_MAX);
+		color.setG(value);
+		greenLabel = std::to_string(value);
+		break;
+	}
+	case Factor::B: {
+		int value = Utils::calculateRGBValueFromPositon(mouseCoords.x, COLOR_INTERVAL_START_X, COLOR_INTERVAL_WIDTH, COLOR_RGB_MAX);
+		color.setB(value);
+		blueLabel = std::to_string(value);
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void ColorPicker::updateColorPanel() {
+	colorPanel.setColor(color);
 }
 
 void ColorPicker::draw() {
@@ -147,11 +240,11 @@ void ColorPicker::draw() {
 	SDL_Rect bounds = colorPanel.getBounds();
 	Color color = BLACK;
 
-	bounds.x = bounds.x - 5;
-	bounds.y = bounds.y - 5;
+	bounds.x = bounds.x - 2;
+	bounds.y = bounds.y - 2;
 
-	bounds.w = bounds.w + 10;
-	bounds.h = bounds.h + 10;
+	bounds.w = bounds.w + 4;
+	bounds.h = bounds.h + 4;
 
 	SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
 	SDL_RenderFillRect(renderer, &bounds);
@@ -202,12 +295,55 @@ void ColorPicker::draw() {
 	SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
 	SDL_RenderFillRect(renderer, &bounds);
 
+	// draw red label
+	SDL_Texture* texture = ImageLoader::getTexture(redLabel, font, renderer);
+	bounds = textBounds(redLabel, LABEL_START_X, LABEL_START_Y, xMax1, xMin1, yMax1, yMin1, advance1);
+
+	SDL_RenderCopy(renderer, texture, NULL, &bounds);
+	SDL_DestroyTexture(texture);
+
+	// draw green label
+	texture = ImageLoader::getTexture(greenLabel, font, renderer);
+	bounds = textBounds(greenLabel, LABEL_START_X, LABEL_START_Y + LABEL_OFFSET, xMax1, xMin1, yMax1, yMin1, advance1);
+
+	SDL_RenderCopy(renderer, texture, NULL, &bounds);
+	SDL_DestroyTexture(texture);
+
+	// draw blue label
+	texture = ImageLoader::getTexture(blueLabel, font, renderer);
+	bounds = textBounds(blueLabel, LABEL_START_X, LABEL_START_Y + 2 * LABEL_OFFSET, xMax1, xMin1, yMax1, yMin1, advance1);
+
+	SDL_RenderCopy(renderer, texture, NULL, &bounds);
+	SDL_DestroyTexture(texture);
+
+	// draw button border
+	bounds = submitButton.getBounds();
+	color = submitButton.getColor();
+
+	SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+	SDL_RenderFillRect(renderer, &bounds);
+
+	// draw submit button
+	texture = ImageLoader::getTexture(SUBMIT_BUTTON, submitFont, renderer);
+	bounds = {bounds.x + 5 , bounds.y + 5, bounds.w - 10, bounds.h - 10};
+
+	SDL_RenderCopy(renderer, texture, NULL, &bounds);
+	SDL_DestroyTexture(texture);
+
 	// update screen
 	SDL_RenderPresent(renderer);
 }
 
 void ColorPicker::closeWindow() {
-	ColorPicker::~ColorPicker();
+	resetClass();
+	reset();
+	setColor(BLACK);
+	submitButton.setColor(SILVER);
+	setVisible(false);
+
+	redLabel = "0";
+	greenLabel= "0";
+	blueLabel = "0";
 }
 
 // setters
@@ -215,13 +351,69 @@ void ColorPicker::setVisible(bool visible) {
 	this->visible = visible;
 }
 
+void ColorPicker::setColor(Color color) {
+	this->color = color;
+}
+
 void ColorPicker::reset() {
-	clickedRed = false;
-	clickedGreen = false;
-	clickedBlue = false;
+	if (!hasReset) {
+		clickedRed = false;
+		clickedGreen = false;
+		clickedBlue = false;
+
+		submitButton.setColor(SILVER);
+		draw();
+		hasReset = true;
+
+		if (clickedSubmit) {
+			setVisible(false);
+			clickedSubmit = false;
+		}
+	}
+}
+
+void ColorPicker::resetClass() {
+	if (window != nullptr) {
+		SDL_DestroyWindow(window);
+		window = nullptr;
+	}
+
+	if (renderer != nullptr) {
+		SDL_DestroyRenderer(renderer);
+		renderer = nullptr;
+	}
+}
+
+SDL_Rect ColorPicker::textBounds(std::string text, int x, int y, int xMax, int xMin, int yMax, int yMin, int advance) {
+	SDL_Rect bounds;
+
+	int textHeight = (yMax - yMin) + advance;
+	int textWidth = advance * text.size();
+
+	bounds.x = x - textWidth / 2;
+	bounds.y = y;
+	bounds.w = textWidth;
+	bounds.h = textHeight;
+
+	return bounds;
+}
+
+SDL_Rect ColorPicker::textBounds(int x, int y, int widht, int height) {
+	SDL_Rect bounds;
+
+	bounds.x = x - widht / 2;
+	bounds.y = y;
+	bounds.w = widht;
+	bounds.h = height;
+
+	return bounds;
 }
 
 // getters
 bool ColorPicker::isVisible() const {
 	return visible;
+}
+
+Color ColorPicker::getColor() const {
+	return color;
 }

@@ -30,6 +30,14 @@ bool Utils::isPointInsideBounds(glm::ivec2 mouseCoords, SDL_Rect bounds) {
     return false;
 }
 
+int Utils::calculateRGBValueFromPositon(int x, int A, int B, int C) {
+    return ((x - A) / (float)B) * C;
+}
+
+int Utils::calculatePositionFromRGBValue(int A, int B, int C, int D) {
+    return (D * B / (float) C) + A;
+}
+
 Color Utils::getButtonColor(int index) {
     switch (index)
     {

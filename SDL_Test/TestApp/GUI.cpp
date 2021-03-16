@@ -21,10 +21,6 @@ GUI::~GUI() {
 		SDL_DestroyRenderer(renderer);
 	}
 
-	if (font != nullptr) {
-		TTF_CloseFont(font);
-	}
-
 	TTF_Quit();
 	SDL_Quit();
 }
@@ -84,25 +80,6 @@ void GUI::initComponents() {
 	// forward the renderer to mainPanel
 	mainPanel.setRenderer(renderer);
 	mainPanel.init();
-
-	// load fonts
-	if ((font = TTF_OpenFont("fonts/Eastwood.ttf", 36)) == nullptr) {
-		std::cout << "TTF_OpenFont has failed: " << TTF_GetError() << std::endl;
-	}
-
-	// set font attributes
-	//TTF_SetFontStyle(font, TTF_STYLE_BOLD);
-
-	int minx, maxx, miny, maxy, advance;
-	if (TTF_GlyphMetrics(font, 'g', &minx, &maxx, &miny, &maxy, &advance) == -1)
-		printf("%s\n", TTF_GetError());
-	else {
-		printf("minx    : %d\n", minx);
-		printf("maxx    : %d\n", maxx);
-		printf("miny    : %d\n", miny);
-		printf("maxy    : %d\n", maxy);
-		printf("advance : %d\n", advance);
-	}
 }
 
 void GUI::run() {
@@ -190,7 +167,7 @@ void GUI::update() {
 
 	// should open colorPicker
 	if (!colorPicker.isVisible() && mainPanel.openColorPicker(inputManager)) {
-		colorPicker.init();
+		colorPicker.init(mainPanel.getSelectedColor());
 		return;
 	}
 
@@ -247,8 +224,14 @@ void GUI::update() {
 }
 
 bool GUI::updateColorPicker() {
-	if (inputManager.getWindowID() != SDL_GetWindowID(window) && colorPicker.isVisible()) {
+	if (colorPicker.isVisible()) {
 		colorPicker.update(inputManager);
+		if (!colorPicker.isVisible()) {
+			mainPanel.setSelectedColor(colorPicker.getColor());
+			colorPicker.closeWindow();
+			change = true;
+			drawHUD();
+		}
 		return true;
 	}
 	return false;
@@ -368,51 +351,6 @@ void GUI::drawCircle(int originX, int originY, int radius) {
 
 		SDL_RenderFillRect(renderer, &rect);
 	}
-}
-
-void GUI::drawText() {
-	drawText("Block number: ", 0, 0);
-	drawText("Eastwood", 100, 100);
-}
-
-void GUI::drawText(std::string text, int x, int y) {
-	SDL_Rect position;
-
-	int xMin, xMax, yMin, yMax, advance;
-	TTF_GlyphMetrics(font, 'g', &xMin, &xMax, &yMin, &yMax, &advance);
-
-	int width = xMax - xMin;
-
-	int textHeight = (yMax - yMin) + advance;
-	int textWidth = advance * text.size();
-
-	position.x = x;
-	position.y = y;
-	position.w = textWidth;
-	position.h = textHeight;
-
-	drawText(&position, text);
-}
-
-void GUI::drawText(SDL_Rect* position, std::string& text) {
-	SDL_Color colorFG{ 255, 255, 255, 255 };
-	SDL_Color colorBG{ 0, 0, 0, 255 };
-	SDL_Surface* textSurface;
-	SDL_Texture* texture;
-
-	if ((textSurface = TTF_RenderUTF8_Shaded(font, text.c_str(), colorFG, colorBG)) != nullptr) {
-		if ((texture = SDL_CreateTextureFromSurface(renderer, textSurface)) == nullptr) {
-			std::cout << "SDL_BlitSurface has failed." << std::endl;
-		}
-		else {
-			SDL_RenderCopy(renderer, texture, NULL, position);
-		}
-		SDL_FreeSurface(textSurface);
-	}
-	else {
-		std::cout << "TTF_RenderText_Solid has failed." << std::endl;
-	}
-
 }
 
 void GUI::updateScreen() {

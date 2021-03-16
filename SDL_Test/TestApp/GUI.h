@@ -24,7 +24,6 @@ private:
 	ColorPicker colorPicker;
 	SDL_Rect rubber;
 	MainPanel mainPanel;
-	TTF_Font* font;
 	bool change;
 public:
 	GUI();

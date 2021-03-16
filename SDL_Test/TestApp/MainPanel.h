@@ -36,6 +36,7 @@ public:
 
 	// setters
 	void setRenderer(SDL_Renderer* renderer);
+	void setSelectedColor(Color selectedColor);
 private:
 	// init
 	void initComponents();

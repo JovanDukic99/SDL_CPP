@@ -8,7 +8,7 @@ private:
 	glm::ivec2 mouseCoordinates;
 	bool moving;
 	int clickNumber;
-	int windowID;
+	unsigned int windowID;
 public:
 	// setters
 	void pressKey(unsigned int keyID);
@@ -16,13 +16,13 @@ public:
 	void setMouseCoordinates(int x, int y);
 	void setMoving(bool moving);
 	void setClickNumber(int clickNumber);
-	void setWindowID(int widowID);
+	void setWindowID(unsigned int windowID);
 
 	// getters
 	glm::ivec2 getMouseCoordinates() const;
 	bool isKeyPressed(unsigned int keyID);
 	bool isMoving() const;
 	bool isDoubleClick() const;
-	int getWindowID() const;
+	unsigned int getWindowID() const;
 };
 
