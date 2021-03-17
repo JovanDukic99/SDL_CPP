@@ -2,6 +2,7 @@
 #include "InputManager.h"
 #include "Component.h"
 #include "ColorPicker.h"
+#include "Font.h"
 #include <SDL/SDL.h>
 #include <SDL/SDL_render.h>
 #include <vector>
@@ -16,6 +17,7 @@ private:
 	int brushSize;
 	Color selectedColor;
 	SDL_Renderer* renderer;
+	Font font;
 public:
 	// constructors
 	MainPanel();
@@ -37,6 +39,7 @@ public:
 	// setters
 	void setRenderer(SDL_Renderer* renderer);
 	void setSelectedColor(Color selectedColor);
+	void setFont(Font font);
 private:
 	// init
 	void initComponents();

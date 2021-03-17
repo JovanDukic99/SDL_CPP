@@ -146,6 +146,7 @@
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="ColorPicker.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="Font.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="ImageLoader.cpp" />
     <ClCompile Include="InputManager.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="ColorPicker.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="Font.h" />
     <ClInclude Include="GUI.h" />
     <ClInclude Include="ImageLoader.h" />
     <ClInclude Include="InputManager.h" />

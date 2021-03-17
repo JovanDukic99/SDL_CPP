@@ -2,8 +2,9 @@
 #include "InputManager.h"
 #include "MainPanel.h"
 #include "ColorPicker.h"
+#include "Font.h"
+#include <glm/glm.hpp>
 #include <SDL/SDL.h>
-#include <SDL_TTF/SDL_ttf.h>
 #include <SDL_IMAGE/SDL_image.h>
 #include <vector>
 #include <stack>
@@ -22,8 +23,11 @@ private:
 	GameState gameState;
 	InputManager inputManager;
 	ColorPicker colorPicker;
+	Font font;
 	SDL_Rect rubber;
 	MainPanel mainPanel;
+	glm::ivec2 start;
+	glm::ivec2 end;
 	bool change;
 public:
 	GUI();
@@ -32,6 +36,7 @@ private:
 	void init();
 	void initSDL();
 	void initTTF();
+	void initFont();
 	void initSDL_Image();
 	void initComponents();
 	void run();
@@ -42,9 +47,6 @@ private:
 	void initDraw();
 	void drawHUD();
 	void drawCircle(int x, int y, int radius);
-	void drawText();
-	void drawText(std::string text, int x, int y);
-	void drawText(SDL_Rect* position, std::string& text);
 	void updateScreen();
 };
 

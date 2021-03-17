@@ -19,8 +19,8 @@ static const int VERTICAL_UNITS = SCREEN_WIDTH / UNIT_WIDTH;
 static const int HORIZONTAL_UNITS = SCREEN_HEIGHT / UNIT_HEIGHT;
 
 // rubber config
-static const int RUBBER_WIDTH = UNIT_WIDTH;
-static const int RUBBER_HEIGHT = UNIT_HEIGHT;
+static const int RUBBER_WIDTH = 4 * UNIT_WIDTH;
+static const int RUBBER_HEIGHT = 4 * UNIT_HEIGHT;
 
 // main panel config
 static const int MAIN_PANEL_WIDTH = SCREEN_WIDTH;
@@ -54,7 +54,7 @@ static const int CURRENT_COLOR_PANEL_START_Y = COLOR_PANEL_START_Y + COLOR_BUTTO
 static const int CURRENT_COLOR_PANEL_WIDTH = COLOR_BUTTON_OFFSET;
 static const int CURRENT_COLOR_PANEL_HEIGHT = COLOR_BUTTON_OFFSET + 5;
 
-// button confit
+// brush button confit
 static const int PANEL_BUTTON_WIDTH = 64;
 static const int PANEL_BUTTON_HEIGHT = 64;
 
@@ -105,7 +105,7 @@ static const int BLUE_TOGGLE_BUTTON_START_X = COLOR_INTERVAL_START_X;
 static const int BLUE_TOGGLE_BUTTON_START_Y = COLOR_INTERVAL_START_Y + 2 * COLOR_INTERVAL_HORIZONTAL_OFFSET;
 
 // label config
-static const int LABEL_PADDING = 40;
+static const int LABEL_PADDING = 20;
 static const int LABEL_OFFSET = 50;
 
 static const int LABEL_START_X = (COLOR_INTERVAL_START_X + COLOR_INTERVAL_END_X) / 2;
@@ -119,6 +119,10 @@ static const int SUBMIT_BUTTON_HEIGHT = 40 + 10;
 
 static const int SUBMIT_BUTTON_START_X = (COLOR_PICKER_WIDTH - SUBMIT_BUTTON_WIDTH) / 2 - 5;
 static const int SUBMIT_BUTTON_START_Y = COLOR_PICKER_HEIGHT - SUBMIT_BUTTON_HEIGHT - 20;
+
+// brush label config
+static const int BRUSH_LABEL_X = BUTTON_START_X + PANEL_BUTTON_WIDTH + UNIT_WIDTH / 2 - 2;
+static const int BRUSH_LABEL_Y = BUTTON_START_Y + PANEL_BUTTON_HEIGHT / 2;
 
 // brush config
 static const int BRUSH_INCREMENT = 1;

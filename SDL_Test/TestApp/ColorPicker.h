@@ -2,9 +2,9 @@
 #include "Component.h"
 #include "InputManager.h"
 #include "Color.h"
+#include "Font.h"
 #include <SDL/SDL.h>
 #include <SDL/SDL_render.h>
-#include <SDL_TTF/SDL_ttf.h>
 #include <string>
 class ColorPicker
 {
@@ -25,10 +25,7 @@ private:
 	Component toggleGreen;
 	Component toggleBlue;
 
-	TTF_Font* font;
-	TTF_Font* submitFont;
-	int xMin1, xMax1, yMin1, yMax1, advance1;
-	int xMin2, xMax2, yMin2, yMax2, advance2;
+	Font font;
 
 	std::string redLabel;
 	std::string greenLabel;
@@ -54,6 +51,7 @@ public:
 	void update(InputManager inputManager);
 
 	// setters
+	void setFont(Font font);
 	void closeWindow();
 
 	// getters
@@ -63,7 +61,6 @@ private:
 	// init
 	void initWindow();
 	void initComponents(Color color);
-	void initFont();
 
 	// update
 	void updateToggleButton(glm::ivec2 mouseCoords, Component* toggleButton);
@@ -75,10 +72,6 @@ private:
 	void setColor(Color color);
 	void reset();
 	void resetClass();
-
-	// getters
-	SDL_Rect textBounds(std::string text, int x, int y, int xMax, int xMin, int yMax, int yMin, int advance);
-	SDL_Rect textBounds(int x, int y, int widht, int height);
 
 	// draw
 	void draw();

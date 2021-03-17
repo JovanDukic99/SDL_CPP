@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "Component.h"
 #include "Utils.h"
+#include "ImageLoader.h"
 #include <iostream>
 
 #define DESIRED_FPS 60
@@ -28,7 +29,9 @@ GUI::~GUI() {
 void GUI::init() {
 	initSDL();
 	initTTF();
+	initFont();
 	initSDL_Image();
+	initFont();
 	initComponents();
 	initDraw();
 	run();
@@ -78,8 +81,16 @@ void GUI::initComponents() {
 	rubber.h = RUBBER_HEIGHT;
 
 	// forward the renderer to mainPanel
+	mainPanel.setFont(font);
 	mainPanel.setRenderer(renderer);
 	mainPanel.init();
+
+	// forward font to ColorPicker
+	colorPicker.setFont(font);
+}
+
+void GUI::initFont() {
+	font.init(FONT_PATH, 48);
 }
 
 void GUI::run() {
@@ -94,6 +105,7 @@ void GUI::run() {
 
 		if (DESIRED_FRAME_TIME > frameTime) {
 			SDL_Delay(DESIRED_FRAME_TIME - frameTime);
+			start = inputManager.getMouseCoordinates();
 		}
 	}
 }
@@ -182,8 +194,13 @@ void GUI::update() {
 				change = true;
 				drawHUD();
 				inputManager.releaseKey(SDL_BUTTON_LEFT);
+				return;
 			}
 		}
+	}
+
+	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && !inputManager.isMoving()) {
+		start = mouseCoords;
 	}
 
 	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && inputManager.isMoving()) {
@@ -193,18 +210,32 @@ void GUI::update() {
 			int brushSize = mainPanel.getBrushSize();
 			Color color = mainPanel.getSelectedColor();
 
-			int width = brushSize * UNIT_WIDTH / 10;
-			int height = brushSize * UNIT_WIDTH / 10;
+			int width = brushSize * UNIT_WIDTH / 20;
+			int height = brushSize * UNIT_WIDTH / 20;
 
 			int x = mouseCoords.x - width / 2;
 			int y = mouseCoords.y - height / 2;
 
-			SDL_Rect bounds = {x, y, width, height};
+			end = mouseCoords;
+
+			std::vector<SDL_Rect> path = Utils::getLinePath(start, end, width, height);
+			//std::vector<SDL_Rect> path = Utils::getLinePath(glm::ivec2(400,400), glm::ivec2(600, 600), width, height);
+
+			for (size_t i = 0; i < path.size(); i++) {
+				SDL_Rect bounds = path[i];
+
+				SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+				SDL_RenderFillRect(renderer, &bounds);
+			}
+
+			/*SDL_Rect bounds = {x, y, width, height};
 
 			SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
-			SDL_RenderFillRect(renderer, &bounds);
+			SDL_RenderFillRect(renderer, &bounds);*/
 
 			inputManager.setMoving(false);
+
+			start = end;
 		}
 	}
 	
@@ -280,6 +311,13 @@ void GUI::drawHUD() {
 		SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
 		SDL_RenderDrawRect(renderer, &bounds);
 	}
+
+	// draw brush label
+	std::string brushLabel = std::to_string(mainPanel.getBrushSize());
+	SDL_Texture* texture = font.getTexture(brushLabel, renderer);
+	SDL_Rect labelBounds = font.getTextBounds(brushLabel, BRUSH_LABEL_X, BRUSH_LABEL_Y);
+
+	SDL_RenderCopy(renderer, texture, NULL, &labelBounds);
 }
 
 void GUI::drawCircle(int originX, int originY, int radius) {

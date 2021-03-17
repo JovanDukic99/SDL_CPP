@@ -132,10 +132,10 @@ bool MainPanel::updateBrushButtons(InputManager inputManager) {
 	for (size_t i = 0; i < brushButtons.size(); i++) {
 		if (Utils::isPointInsideBounds(inputManager.getMouseCoordinates(), brushButtons[i].getBounds())) {
 			if (brushButtons[i].getID() == 0) {
-				brushSize = glm::clamp(brushSize + BRUSH_INCREMENT, 1, 10);
+				brushSize = glm::clamp(brushSize + BRUSH_INCREMENT, 1, 20);
 			}
 			else {
-				brushSize = glm::clamp(brushSize - BRUSH_INCREMENT, 1, 10);
+				brushSize = glm::clamp(brushSize - BRUSH_INCREMENT, 1, 20);
 			}
 			return true;
 		}
@@ -172,4 +172,8 @@ void MainPanel::setRenderer(SDL_Renderer* renderer) {
 void MainPanel::setSelectedColor(Color selectedColor) {
 	colorButtons[colorButtons.size() - 1].setColor(selectedColor);
 	this->selectedColor = selectedColor;
+}
+
+void MainPanel::setFont(Font font) {
+	this->font = font;
 }

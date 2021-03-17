@@ -38,6 +38,57 @@ int Utils::calculatePositionFromRGBValue(int A, int B, int C, int D) {
     return (D * B / (float) C) + A;
 }
 
+std::vector<SDL_Rect> Utils::getLinePath(glm::ivec2 p1, glm::ivec2 p2, int pathWidth, int pathHeight) {
+    std::vector<SDL_Rect> path;
+    std::vector<glm::ivec2> points;
+
+    /*int dx = std::abs(p2.x - p1.x);
+    int dy = std::abs(p2.y - p1.y);
+    int N = std::max(dx, dy);
+
+    float divN = ((N == 0) ? 0.0f : (1.0f / N));
+    float xStep = dx * divN;
+    float yStep = dy * divN;
+
+    float x = p1.x;
+    float y = p1.y;
+
+    path.reserve(N + 1);
+    points.reserve(N + 1);
+
+    for (int step = 0; step <= N; step++, x += xStep, y += yStep) {
+        points.push_back(glm::ivec2(std::round(x), std::round(y)));
+    }*/
+
+    glm::fvec2 start = p1;
+    glm::fvec2 end = p2;
+
+    float N = glm::distance(start, end);
+
+    path.reserve(N + 1);
+    path.reserve(N + 1);
+
+    for (int step = 0; step <= N; step++) {
+        float t = ((N == 0) ? 0.0f : (step / N));
+        points.push_back(glm::round(lerp(start, end, t)));
+    }
+
+    for (size_t i = 0; i < points.size(); i++) {
+        SDL_Rect rect;
+        glm::ivec2 point = points[i];
+
+        rect.w = pathWidth;
+        rect.h = pathHeight;
+
+        rect.x = point.x - pathWidth / 2;
+        rect.y = point.y - pathHeight / 2;
+        
+        path.push_back(rect);
+    }
+
+    return path;
+}
+
 Color Utils::getButtonColor(int index) {
     switch (index)
     {
@@ -85,4 +136,8 @@ Color Utils::getButtonColor(int index) {
         return BLACK;
     }
     return Color();
+}
+
+glm::fvec2 Utils::lerp(glm::fvec2 p1, glm::fvec2 p2, float t) {
+    return p1 * (1 - t) + p2 * t;
 }

@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <iostream>
 
-ColorPicker::ColorPicker() : window(nullptr), renderer(nullptr), font(nullptr), visible(false), clickedRed(false), clickedGreen(false), clickedBlue(false), clickedSubmit(false), hasReset(true), redLabel("0"), greenLabel("0"), blueLabel("0") {
+ColorPicker::ColorPicker() : window(nullptr), renderer(nullptr), visible(false), clickedRed(false), clickedGreen(false), clickedBlue(false), clickedSubmit(false), hasReset(true), redLabel("0"), greenLabel("0"), blueLabel("0") {
 
 }
 
@@ -16,7 +16,6 @@ ColorPicker::~ColorPicker() {
 void ColorPicker::init(Color color) {
 	initWindow();
 	initComponents(color);
-	initFont();
 	draw();
 	setVisible(true);
 }
@@ -94,34 +93,6 @@ void ColorPicker::initComponents(Color color) {
 	greenLabel = std::to_string(color.getG());
 	blueLabel = std::to_string(color.getB());
 	setColor(color);
-}
-
-void ColorPicker::initFont() {
-	if (font == nullptr) {
-		if ((font = TTF_OpenFont(FONT_PATH.c_str(), 28)) == nullptr) {
-			std::cout << "TTF_OpenFont has failed." << std::endl;
-			return;
-		}
-		TTF_GlyphMetrics(font, 'g', &xMin1, &xMax1, &yMin1, &yMax1, &advance1);
-		printf("minx    : %d\n", xMin1);
-		printf("maxx    : %d\n", xMax1);
-		printf("miny    : %d\n", yMin1);
-		printf("maxy    : %d\n", yMax1);
-		printf("advance : %d\n", advance1);
-	}
-
-	if (submitFont == nullptr) {
-		if ((submitFont = TTF_OpenFont(FONT_PATH.c_str(), 72)) == nullptr) {
-			std::cout << "TTF_OpenFont has failed." << std::endl;
-			return;
-		}
-		TTF_GlyphMetrics(submitFont, 'g', &xMin2, &xMax2, &yMin2, &yMax2, &advance2);
-		printf("\nminx    : %d\n", xMin2);
-		printf("maxx    : %d\n", xMax2);
-		printf("miny    : %d\n", yMin2);
-		printf("maxy    : %d\n", yMax2);
-		printf("advance : %d\n", advance2);
-	}
 }
 
 // update
@@ -296,22 +267,22 @@ void ColorPicker::draw() {
 	SDL_RenderFillRect(renderer, &bounds);
 
 	// draw red label
-	SDL_Texture* texture = ImageLoader::getTexture(redLabel, font, renderer);
-	bounds = textBounds(redLabel, LABEL_START_X, LABEL_START_Y, xMax1, xMin1, yMax1, yMin1, advance1);
+	SDL_Texture* texture = font.getTexture(redLabel, renderer);
+	bounds = font.getTextBounds(redLabel, LABEL_START_X, LABEL_START_Y);
 
 	SDL_RenderCopy(renderer, texture, NULL, &bounds);
 	SDL_DestroyTexture(texture);
 
 	// draw green label
-	texture = ImageLoader::getTexture(greenLabel, font, renderer);
-	bounds = textBounds(greenLabel, LABEL_START_X, LABEL_START_Y + LABEL_OFFSET, xMax1, xMin1, yMax1, yMin1, advance1);
+	texture = font.getTexture(greenLabel, renderer);
+	bounds = font.getTextBounds(greenLabel, LABEL_START_X, LABEL_START_Y +  LABEL_OFFSET);
 
 	SDL_RenderCopy(renderer, texture, NULL, &bounds);
 	SDL_DestroyTexture(texture);
 
 	// draw blue label
-	texture = ImageLoader::getTexture(blueLabel, font, renderer);
-	bounds = textBounds(blueLabel, LABEL_START_X, LABEL_START_Y + 2 * LABEL_OFFSET, xMax1, xMin1, yMax1, yMin1, advance1);
+	texture = font.getTexture(blueLabel, renderer);
+	bounds = font.getTextBounds(blueLabel, LABEL_START_X, LABEL_START_Y + 2 * LABEL_OFFSET);
 
 	SDL_RenderCopy(renderer, texture, NULL, &bounds);
 	SDL_DestroyTexture(texture);
@@ -324,7 +295,7 @@ void ColorPicker::draw() {
 	SDL_RenderFillRect(renderer, &bounds);
 
 	// draw submit button
-	texture = ImageLoader::getTexture(SUBMIT_BUTTON, submitFont, renderer);
+	texture = font.getTexture(SUBMIT_BUTTON, renderer);
 	bounds = {bounds.x + 5 , bounds.y + 5, bounds.w - 10, bounds.h - 10};
 
 	SDL_RenderCopy(renderer, texture, NULL, &bounds);
@@ -332,6 +303,10 @@ void ColorPicker::draw() {
 
 	// update screen
 	SDL_RenderPresent(renderer);
+}
+
+void ColorPicker::setFont(Font font) {
+	this->font = font;
 }
 
 void ColorPicker::closeWindow() {
@@ -382,31 +357,6 @@ void ColorPicker::resetClass() {
 		SDL_DestroyRenderer(renderer);
 		renderer = nullptr;
 	}
-}
-
-SDL_Rect ColorPicker::textBounds(std::string text, int x, int y, int xMax, int xMin, int yMax, int yMin, int advance) {
-	SDL_Rect bounds;
-
-	int textHeight = (yMax - yMin) + advance;
-	int textWidth = advance * text.size();
-
-	bounds.x = x - textWidth / 2;
-	bounds.y = y;
-	bounds.w = textWidth;
-	bounds.h = textHeight;
-
-	return bounds;
-}
-
-SDL_Rect ColorPicker::textBounds(int x, int y, int widht, int height) {
-	SDL_Rect bounds;
-
-	bounds.x = x - widht / 2;
-	bounds.y = y;
-	bounds.w = widht;
-	bounds.h = height;
-
-	return bounds;
 }
 
 // getters
