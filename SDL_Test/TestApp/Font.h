@@ -1,5 +1,6 @@
 #pragma once
 #include "ImageLoader.h"
+#include "Color.h"
 #include <SDL/SDL_render.h>
 #include <SDL_TTF/SDL_ttf.h>
 #include <string>	
@@ -17,7 +18,7 @@ public:
 	void init(std::string fontPath, int size);
 
 	// getters
-	SDL_Texture* getTexture(std::string text, SDL_Renderer* renderer);
+	SDL_Texture* getFontTexture(std::string text, Color color, SDL_Renderer* renderer);
 	SDL_Rect getTextBounds(std::string text, int x, int y);
 
 	// setters

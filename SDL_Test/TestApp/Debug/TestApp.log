@@ -1,6 +1,5 @@
-﻿  Utils.cpp
-D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(34,33): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
-D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(38,32): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
-D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(68,20): warning C4244: 'argument': conversion from 'float' to 'const unsigned int', possible loss of data
-D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(69,20): warning C4244: 'argument': conversion from 'float' to 'const unsigned int', possible loss of data
+﻿  Controller.cpp
+  MainFrame.cpp
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\MainFrame.cpp(344,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  Generating Code...
   TestApp.vcxproj -> D:\Users\Jovan\C++\SDL_Testing\SDL_Test\Debug\TestApp.exe

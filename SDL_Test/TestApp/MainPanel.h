@@ -14,6 +14,7 @@ private:
 	std::vector<Component> panels;
 	std::vector<Component> colorButtons;
 	std::vector<Component> brushButtons;
+	std::vector<Component> utilityButtons;
 	int brushSize;
 	Color selectedColor;
 	SDL_Renderer* renderer;
@@ -33,6 +34,7 @@ public:
 	std::vector<Component> getPanels() const;
 	std::vector<Component> getColorButtons() const;
 	std::vector<Component> getBrushButtons() const;
+	std::vector<Component> getUtilityButtons() const;
 	int getBrushSize() const;
 	Color getSelectedColor() const;
 

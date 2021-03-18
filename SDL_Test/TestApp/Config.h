@@ -48,11 +48,35 @@ static const int COLOR_PANEL_START_X = 20;
 static const int COLOR_PANEL_START_Y = 20;
 
 // current color panel
-static const int CURRENT_COLOR_PANEL_START_X = COLOR_PANEL_WIDTH + COLOR_BUTTON_OFFSET - 5;
-static const int CURRENT_COLOR_PANEL_START_Y = COLOR_PANEL_START_Y + COLOR_BUTTON_OFFSET / 2;
+static const int CURRENT_COLOR_PANEL_X = COLOR_PANEL_WIDTH + COLOR_BUTTON_OFFSET;
+static const int CURRENT_COLOR_PANEL_Y = COLOR_PANEL_START_Y;
 
-static const int CURRENT_COLOR_PANEL_WIDTH = COLOR_BUTTON_OFFSET;
-static const int CURRENT_COLOR_PANEL_HEIGHT = COLOR_BUTTON_OFFSET + 5;
+static const int CURRENT_COLOR_PANEL_WIDTH = UNIT_WIDTH;
+static const int CURRENT_COLOR_PANEL_HEIGHT = COLOR_PANEL_HEIGHT;
+
+// utility panel
+static const int UTILITY_PANEL_X = CURRENT_COLOR_PANEL_X + CURRENT_COLOR_PANEL_WIDTH + 5;
+static const int UTILITY_PANEL_Y = CURRENT_COLOR_PANEL_Y;
+
+static const int UTILITY_PANEL_WIDTH = CURRENT_COLOR_PANEL_WIDTH;
+static const int UTILITY_PANEL_HEIGHT = CURRENT_COLOR_PANEL_HEIGHT;
+
+// current color button
+static const int CURRENT_COLOR_BUTTON_X = CURRENT_COLOR_PANEL_X + 5;
+static const int CURRENT_COLOR_BUTTON_Y = CURRENT_COLOR_PANEL_Y + 5;
+
+static const int CURRENT_COLOR_BUTTON_WIDTH = CURRENT_COLOR_PANEL_WIDTH - 10;
+static const int CURRENT_COLOR_BUTTON_HEIGHT = CURRENT_COLOR_PANEL_HEIGHT - 11;
+
+// utility button config
+static const int UTILITY_BUTTON_START_X = CURRENT_COLOR_BUTTON_X + CURRENT_COLOR_PANEL_WIDTH + 5;
+static const int UTILITY_BUTTON_START_Y = CURRENT_COLOR_BUTTON_Y;
+
+static const int UTILITY_BUTTON_WIDTH = COLOR_BUTTON_WIDTH;
+static const int UTILITY_BUTTON_HEIGHT = COLOR_BUTTON_HEIGHT;
+
+static const int UTILITY_BUTTON_HORIZONTAL_OFFSET = UTILITY_BUTTON_WIDTH + 5;
+static const int UTILITY_BUTTON_VERTICAL_OFFSET = UTILITY_BUTTON_HEIGHT + 5;
 
 // brush button confit
 static const int PANEL_BUTTON_WIDTH = 64;
@@ -67,6 +91,8 @@ static const int BUTTON_SAPWN_DIFF_Y = UNIT_HEIGHT;
 // asset config
 static const std::string MINUS_BUTTON_PATH = "Assets/Textures/minus_button.png";
 static const std::string PLUS_BUTTON_PATH = "Assets/Textures/plus_button.png";
+static const std::string PAINT_BUCKET_BUTTON_PATH = "Assets/Textures/paint_bucket.png";
+static const std::string PENCIL_BUTTON_PATH = "Assets/Textures/pencil.png";
 static const std::string FONT_PATH = "fonts/Roboto-Light.ttf";
 
 // color picker config

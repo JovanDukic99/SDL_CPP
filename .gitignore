@@ -7,3 +7,8 @@
 *.exe
 *.ilk
 *.pdb
+SDL_Test/.vs/SDL_Test/v16/.suo
+*.ipch
+*.exe
+*.ilk
+*.tlog

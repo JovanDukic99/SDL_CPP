@@ -47,10 +47,21 @@ void MainPanel::initPanels() {
 	currentColorPanel.w = CURRENT_COLOR_PANEL_WIDTH;
 	currentColorPanel.h = CURRENT_COLOR_PANEL_HEIGHT;
 
-	currentColorPanel.x = CURRENT_COLOR_PANEL_START_X;
-	currentColorPanel.y = CURRENT_COLOR_PANEL_START_Y;
+	currentColorPanel.x = CURRENT_COLOR_PANEL_X;
+	currentColorPanel.y = CURRENT_COLOR_PANEL_Y;
 
 	panels.emplace_back(currentColorPanel, GRAY);
+
+	// ================= <Current Color Panel> ================= //
+	SDL_Rect utilityPanel;
+
+	utilityPanel.w = UTILITY_PANEL_WIDTH;
+	utilityPanel.h = UTILITY_PANEL_HEIGHT;
+
+	utilityPanel.x = UTILITY_PANEL_X;
+	utilityPanel.y = UTILITY_PANEL_Y;
+
+	panels.emplace_back(utilityPanel, GRAY);
 }
 
 void MainPanel::initButtons() {
@@ -74,11 +85,11 @@ void MainPanel::initButtons() {
 	// ================= <Current Color Button> ================= //
 	SDL_Rect bounds;
 
-	bounds.w = COLOR_BUTTON_WIDTH;
-	bounds.h = COLOR_BUTTON_HEIGHT;
+	bounds.w = CURRENT_COLOR_BUTTON_WIDTH;
+	bounds.h = CURRENT_COLOR_BUTTON_HEIGHT;
 
-	bounds.x = COLOR_BUTTON_START_X + (COLOR_BUTTON_NUMBER / 2) * COLOR_BUTTON_OFFSET;
-	bounds.y = COLOR_BUTTON_START_Y + COLOR_BUTTON_OFFSET / 2;
+	bounds.x = CURRENT_COLOR_BUTTON_X;
+	bounds.y = CURRENT_COLOR_BUTTON_Y;
 
 	colorButtons.emplace_back(bounds, BLACK);
 
@@ -102,6 +113,29 @@ void MainPanel::initButtons() {
 		bounds.y = BUTTON_START_Y;
 
 		brushButtons.emplace_back(bounds, BLACK, texutre, i);
+	}
+
+	// ================= <Utility Buttons> ================= //
+	utilityButtons.reserve(2);
+	for (size_t i = 0; i < 2; i++) {
+		SDL_Texture* texture = nullptr;
+
+		if (i == 0) {
+			texture = ImageLoader::loadTexture(PAINT_BUCKET_BUTTON_PATH, renderer);
+		}
+		else {
+			texture = ImageLoader::loadTexture(PENCIL_BUTTON_PATH, renderer);
+		}
+
+		SDL_Rect bounds;
+
+		bounds.w = UTILITY_BUTTON_WIDTH;
+		bounds.h = UTILITY_BUTTON_HEIGHT;
+
+		bounds.x = UTILITY_BUTTON_START_X + i * UTILITY_BUTTON_HORIZONTAL_OFFSET;
+		bounds.y = UTILITY_BUTTON_START_Y;
+
+		utilityButtons.emplace_back(bounds, GREEN, texture);
 	}
 }
 
@@ -154,6 +188,10 @@ std::vector<Component> MainPanel::getColorButtons() const {
 
 std::vector<Component> MainPanel::getBrushButtons() const {
 	return brushButtons;
+}
+
+std::vector<Component> MainPanel::getUtilityButtons() const {
+	return utilityButtons;
 }
 
 int MainPanel::getBrushSize() const {

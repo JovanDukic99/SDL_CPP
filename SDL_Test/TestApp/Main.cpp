@@ -1,8 +1,8 @@
-#include "GUI.h"
+#include "MainFrame.h"
 
 int main(int argc, char* argv[]) {
 
-	GUI screen;
+	MainFrame mainFrame;
 
 	return 0;
 }

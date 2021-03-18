@@ -22,8 +22,8 @@ void Font::loadFont(std::string fontPath, int size) {
 }
 
 // getters
-SDL_Texture* Font::getTexture(std::string text, SDL_Renderer* renderer) {
-	return ImageLoader::getTexture(text, font, renderer);
+SDL_Texture* Font::getFontTexture(std::string text, Color color, SDL_Renderer* renderer) {
+	return ImageLoader::getFontTexture(text, font, color, renderer);
 }
 
 SDL_Rect Font::getTextBounds(std::string text, int x, int y) {
