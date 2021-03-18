@@ -15,7 +15,7 @@ public:
 	static bool isPointInsideBounds(glm::ivec2 mouseCoords, SDL_Rect bounds);
 	static int calculateRGBValueFromPositon(int x, int A, int B, int C);
 	static int calculatePositionFromRGBValue(int A, int B, int C, int D);
-	static SDL_Surface* getCursorSurface(State state);
+	static SDL_Cursor* getCursor(ActionState state);
 	static std::vector<SDL_Rect> getLinePath(glm::ivec2 p1, glm::ivec2 p2, int pathWidth, int pathHeight);
 	static Color getButtonColor(int index);
 private:

@@ -37,7 +37,7 @@ SDL_Surface* ImageLoader::loadSurface(std::string filePath) {
 	return loadedSurface;
 }
 
-SDL_Surface* ImageLoader::loadCursor(std::string filePath) {
+SDL_Surface* ImageLoader::loadCursorSurface(std::string filePath) {
 	SDL_Surface* loadedSurface = findSurface(filePath);
 
 	if (loadedSurface == nullptr) {

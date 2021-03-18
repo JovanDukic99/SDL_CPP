@@ -2,6 +2,7 @@
 #include "InputManager.h"
 #include "Component.h"
 #include "ColorPicker.h"
+#include "Controller.h"
 #include "Font.h"
 #include <SDL/SDL.h>
 #include <SDL/SDL_render.h>
@@ -18,6 +19,7 @@ private:
 	int brushSize;
 	Color selectedColor;
 	SDL_Renderer* renderer;
+	Controller* controller;
 	Font font;
 public:
 	// constructors
@@ -47,8 +49,10 @@ private:
 	void initComponents();
 	void initPanels();
 	void initButtons();
+	void initController();
 
 	// update
 	bool updateColorButtons(InputManager inputManager);
 	bool updateBrushButtons(InputManager inputManager);
+	bool updateUtilityButtons(InputManager inputManager);
 };

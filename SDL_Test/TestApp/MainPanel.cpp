@@ -4,7 +4,7 @@
 #include "ImageLoader.h"
 #include <iostream>
 
-MainPanel::MainPanel() : brushSize(1), renderer(nullptr) {
+MainPanel::MainPanel() : brushSize(1), renderer(nullptr), controller(nullptr) {
 	
 }
 
@@ -15,6 +15,7 @@ void MainPanel::init() {
 void MainPanel::initComponents() {
 	initPanels();
 	initButtons();
+	initController();
 }
 
 void MainPanel::initPanels() {
@@ -121,10 +122,10 @@ void MainPanel::initButtons() {
 		SDL_Texture* texture = nullptr;
 
 		if (i == 0) {
-			texture = ImageLoader::loadTexture(PAINT_BUCKET_BUTTON_PATH, renderer);
+			texture = ImageLoader::loadTexture(PENCIL_BUTTON_PATH, renderer);
 		}
 		else {
-			texture = ImageLoader::loadTexture(PENCIL_BUTTON_PATH, renderer);
+			texture = ImageLoader::loadTexture(BUCKET_BUTTON_PATH, renderer);
 		}
 
 		SDL_Rect bounds;
@@ -135,13 +136,19 @@ void MainPanel::initButtons() {
 		bounds.x = UTILITY_BUTTON_START_X + i * UTILITY_BUTTON_HORIZONTAL_OFFSET;
 		bounds.y = UTILITY_BUTTON_START_Y;
 
-		utilityButtons.emplace_back(bounds, GREEN, texture);
+		utilityButtons.emplace_back(bounds, GREEN, texture, i + 2);
+	}
+}
+
+void MainPanel::initController() {
+	if (controller == nullptr) {
+		controller = Controller::getInstance();
 	}
 }
 
 // update functions
 bool MainPanel::update(InputManager inputManager) {
-	return updateColorButtons(inputManager) || updateBrushButtons(inputManager);
+	return updateColorButtons(inputManager) || updateBrushButtons(inputManager) || updateUtilityButtons(inputManager);
 }
 
 bool MainPanel::openColorPicker(InputManager inputManager) {
@@ -170,6 +177,22 @@ bool MainPanel::updateBrushButtons(InputManager inputManager) {
 			}
 			else {
 				brushSize = glm::clamp(brushSize - BRUSH_INCREMENT, 1, 20);
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+bool MainPanel::updateUtilityButtons(InputManager inputManager) {
+	for (size_t i = 0; i < utilityButtons.size(); i++) {
+		if (Utils::isPointInsideBounds(inputManager.getMouseCoordinates(), utilityButtons[i].getBounds())) {
+			int ID = utilityButtons[i].getID();
+			if (ID == PENCIL_BUTTON_ID) {
+				controller->setPreviousActionState(ActionState::PAINTING);
+			}
+			else if (ID == BUCKET_BUTTON_ID) {
+				controller->setPreviousActionState(ActionState::BUCKET_PAINTING);
 			}
 			return true;
 		}

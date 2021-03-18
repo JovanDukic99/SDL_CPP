@@ -1,8 +1,8 @@
 #pragma once
 
-enum class State {
+enum class ActionState {
 	NONE,
-	DRAWING,
+	PAINTING,
 	ERASING,
 	BUCKET_PAINTING
 };
@@ -16,7 +16,8 @@ class Controller
 {
 private:
 	static Controller* INSTANCE;
-	State state;
+	ActionState actionState;
+	ActionState previousActionState;
 	ScreenState screenState;
 private:
 	Controller();
@@ -25,11 +26,18 @@ public:
 	static Controller* getInstance();
 
 	// getters
-	State getState() const;
+	ActionState getActionState() const;
+	ActionState getPreviousActionState() const;
 	ScreenState getScreenState() const;
+	bool isNone() const;
+	bool isPainting() const;
+	bool isEraseing() const;
+	bool isBucketPainting() const;
 
 	// setters
-	void setState(State state);
+	void setActionState(ActionState actionState);
 	void setScreenState(ScreenState screenState);
+	void setPreviousActionState(ActionState previousActionState);
+	void updatePreviousActionState();
 };
 

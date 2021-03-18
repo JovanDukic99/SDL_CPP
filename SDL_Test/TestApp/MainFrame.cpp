@@ -104,6 +104,7 @@ void MainFrame::run() {
 		Uint32 startTime = SDL_GetTicks();
 		handleInputEvents();
 		update();
+		updateCursor();
 		updateScreen();
 
 		Uint32 endTime = SDL_GetTicks();
@@ -183,6 +184,17 @@ void MainFrame::update() {
 		return;	
 	}
 
+	if (!controller->isNone() && mouseCoords.y < MAIN_PANEL_HEIGHT) {
+		controller->updatePreviousActionState();
+		controller->setActionState(ActionState::NONE);
+		controller->setScreenState(ScreenState::REFRESH);
+	}
+
+	if ((controller->isNone() || controller->isEraseing()) && mouseCoords.y >= MAIN_PANEL_HEIGHT) {
+		controller->setActionState(controller->getPreviousActionState());
+		controller->setScreenState(ScreenState::REFRESH);
+	}
+
 	// should open colorPicker
 	if (!colorPicker.isVisible() && mainPanel.openColorPicker(inputManager)) {
 		colorPicker.init(mainPanel.getSelectedColor());
@@ -195,7 +207,7 @@ void MainFrame::update() {
 	}
 
 	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
-		if (mouseCoords.y < 2 * UNIT_HEIGHT) {
+		if (mouseCoords.y < MAIN_PANEL_HEIGHT) {
 			if (mainPanel.update(inputManager)) {
 				controller->setScreenState(ScreenState::REFRESH);
 				drawHUD();
@@ -212,7 +224,7 @@ void MainFrame::update() {
 	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && inputManager.isMoving()) {
 		controller->setScreenState(ScreenState::REFRESH);
 
-		if (mouseCoords.y >  2 * UNIT_HEIGHT) {
+		if (mouseCoords.y >  MAIN_PANEL_HEIGHT) {
 			int brushSize = mainPanel.getBrushSize();
 			Color color = mainPanel.getSelectedColor();
 
@@ -236,6 +248,11 @@ void MainFrame::update() {
 			inputManager.setMoving(false);
 
 			start = end;
+
+			if (controller->isEraseing()) {
+				controller->setActionState(ActionState::PAINTING);
+				controller->setScreenState(ScreenState::REFRESH);
+			}
 		}
 	}
 	
@@ -244,11 +261,16 @@ void MainFrame::update() {
 
 		glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
 
-		rubber.x = mouseCoords.x - rubber.w / 2;
-		rubber.y = mouseCoords.y - rubber.h / 2;
+		rubber.x = mouseCoords.x - RUBBER_CURSOR_HOT_X;
+		rubber.y = mouseCoords.y - RUBBER_CURSOR_HOT_Y;
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderFillRect(renderer, &rubber);
+
+		if (!controller->isEraseing()) {
+			controller->updatePreviousActionState();
+			controller->setActionState(ActionState::ERASING);
+		}
 	}
 
 	inputManager.setClickNumber(0);
@@ -332,8 +354,10 @@ void MainFrame::drawHUD() {
 	SDL_RenderCopy(renderer, texture, NULL, &labelBounds);
 }
 
-void MainFrame::drawCursor() {
-
+void MainFrame::updateCursor() {
+	if (refresh()) {
+		SDL_SetCursor(Utils::getCursor(controller->getActionState()));
+	}
 }
 
 void MainFrame::drawCircle(int originX, int originY, int radius) {

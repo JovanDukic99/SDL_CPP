@@ -15,7 +15,7 @@ private:
 public:
 	static SDL_Texture* loadTexture(std::string filePath, SDL_Renderer* renderer);
 	static SDL_Surface* loadSurface(std::string filePath);
-	static SDL_Surface* loadCursor(std::string filePath);
+	static SDL_Surface* loadCursorSurface(std::string filePath);
 	static SDL_Texture* getFontTexture(std::string text, TTF_Font* font, Color color, SDL_Renderer* renderer);
 private:
 	static SDL_Surface* findSurface(std::string filePath);

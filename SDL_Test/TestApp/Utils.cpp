@@ -1,4 +1,6 @@
 #include "Utils.h"
+#include "ImageLoader.h"
+#include "Config.h"
 
 bool Utils::squareCollision(SDL_Rect r1, SDL_Rect r2) {
     return areColliding(r1, r2) || areColliding(r2, r1);
@@ -36,6 +38,26 @@ int Utils::calculateRGBValueFromPositon(int x, int A, int B, int C) {
 
 int Utils::calculatePositionFromRGBValue(int A, int B, int C, int D) {
     return (D * B / (float) C) + A;
+}
+
+SDL_Cursor* Utils::getCursor(ActionState state) {
+    switch (state)
+    {
+    case ActionState::NONE: {
+        return SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+    }
+    case ActionState::PAINTING: {
+        return SDL_CreateColorCursor(ImageLoader::loadCursorSurface(PENCIL_CURSOR_PATH), PENCIL_CURSOR_HOT_X, PENCIL_CURSOR_HOT_Y);
+    }
+    case ActionState::ERASING: {
+        return SDL_CreateColorCursor(ImageLoader::loadCursorSurface(RUBBER_CURSOR_PATH), RUBBER_CURSOR_HOT_X, RUBBER_CURSOR_HOT_Y);
+    }
+    case ActionState::BUCKET_PAINTING: {
+        return SDL_CreateColorCursor(ImageLoader::loadCursorSurface(BUCKET_CURSOR_PATH), BUCKET_CURSOR_HOT_X, BUCKET_CURSOR_HOT_Y);
+    }
+    default:
+        return SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+    }
 }
 
 std::vector<SDL_Rect> Utils::getLinePath(glm::ivec2 p1, glm::ivec2 p2, int pathWidth, int pathHeight) {

@@ -48,7 +48,7 @@ private:
 	bool updateColorPicker();
 	void initDraw();
 	void drawHUD();
-	void drawCursor();
+	void updateCursor();
 	void drawCircle(int x, int y, int radius);
 	void updateScreen();
 	bool refresh();

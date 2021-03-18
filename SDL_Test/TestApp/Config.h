@@ -18,9 +18,26 @@ static const int UNIT_HEIGHT = 60;
 static const int VERTICAL_UNITS = SCREEN_WIDTH / UNIT_WIDTH;
 static const int HORIZONTAL_UNITS = SCREEN_HEIGHT / UNIT_HEIGHT;
 
+// =================== < Button IDs > =================== //
+static const int PLUS_BUTTON_ID = 0;
+static const int MINUS_BUTTON_ID = 1;
+
+static const int PENCIL_BUTTON_ID = 2;
+static const int BUCKET_BUTTON_ID = 3;
+
+// cursor config
+static const int PENCIL_CURSOR_HOT_X = 2;
+static const int PENCIL_CURSOR_HOT_Y = 29;
+
+static const int BUCKET_CURSOR_HOT_X = 13;
+static const int BUCKET_CURSOR_HOT_Y = 16;
+
+static const int RUBBER_CURSOR_HOT_X = 13;
+static const int RUBBER_CURSOR_HOT_Y = 31;
+
 // rubber config
-static const int RUBBER_WIDTH = 4 * UNIT_WIDTH;
-static const int RUBBER_HEIGHT = 4 * UNIT_HEIGHT;
+static const int RUBBER_WIDTH = 32;
+static const int RUBBER_HEIGHT = 32;
 
 // main panel config
 static const int MAIN_PANEL_WIDTH = SCREEN_WIDTH;
@@ -91,8 +108,15 @@ static const int BUTTON_SAPWN_DIFF_Y = UNIT_HEIGHT;
 // asset config
 static const std::string MINUS_BUTTON_PATH = "Assets/Textures/minus_button.png";
 static const std::string PLUS_BUTTON_PATH = "Assets/Textures/plus_button.png";
-static const std::string PAINT_BUCKET_BUTTON_PATH = "Assets/Textures/paint_bucket.png";
+
+static const std::string BUCKET_BUTTON_PATH = "Assets/Textures/bucket.png";
+static const std::string BUCKET_CURSOR_PATH = "Assets/Textures/bucket_cursor.png";
+
 static const std::string PENCIL_BUTTON_PATH = "Assets/Textures/pencil.png";
+static const std::string PENCIL_CURSOR_PATH = "Assets/Textures/pencil_cursor.png";
+
+static const std::string RUBBER_CURSOR_PATH = "Assets/Textures/rubber_cursor.png";
+
 static const std::string FONT_PATH = "fonts/Roboto-Light.ttf";
 
 // color picker config
