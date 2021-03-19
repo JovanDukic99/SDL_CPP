@@ -54,3 +54,7 @@ void Color::setA(Uint8 a) {
 bool Color::operator==(const Color& color) {
 	return coefficients[0] == color.coefficients[0] && coefficients[1] == color.coefficients[1] && coefficients[2] == color.coefficients[2] && coefficients[3] == color.coefficients[3];
 }
+
+bool Color::operator!=(const Color& color) {
+	return !operator==(color);
+}

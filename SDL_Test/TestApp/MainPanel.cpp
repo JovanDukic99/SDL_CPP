@@ -4,7 +4,7 @@
 #include "ImageLoader.h"
 #include <iostream>
 
-MainPanel::MainPanel() : brushSize(1), renderer(nullptr), controller(nullptr) {
+MainPanel::MainPanel() : brushSize(1), renderer(nullptr), controller(nullptr), selectedColor(BLACK) {
 	
 }
 

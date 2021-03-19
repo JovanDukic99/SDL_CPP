@@ -53,5 +53,6 @@ public:
 
 	// operator overload
 	bool operator==(const Color& color);
+	bool operator!=(const Color& color);
 };
 

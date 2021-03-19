@@ -1,6 +1,21 @@
 #include "Utils.h"
 #include "ImageLoader.h"
 #include "Config.h"
+#include <queue>
+
+SDL_Rect Utils::screenBounds = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT};
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+Uint32 Utils::rmask = 0xff000000;
+Uint32 Utils::gmask = 0x00ff0000;
+Uint32 Utils::bmask = 0x0000ff00;
+Uint32 Utils::amask = 0x000000ff;
+#else
+Uint32 Utils::rmask = 0x000000ff;
+Uint32 Utils::gmask = 0x0000ff00;
+Uint32 Utils::bmask = 0x00ff0000;
+Uint32 Utils::amask = 0xff000000;
+#endif
 
 bool Utils::squareCollision(SDL_Rect r1, SDL_Rect r2) {
     return areColliding(r1, r2) || areColliding(r2, r1);
@@ -38,6 +53,103 @@ int Utils::calculateRGBValueFromPositon(int x, int A, int B, int C) {
 
 int Utils::calculatePositionFromRGBValue(int A, int B, int C, int D) {
     return (D * B / (float) C) + A;
+}
+
+void Utils::paintWithBucket(glm::ivec2 seedCoords, Color color, SDL_Renderer* renderer) {
+    SDL_Surface* surface = SDL_CreateRGBSurface(0, 1, 1, 32, rmask, gmask, bmask, amask);
+
+    std::queue <Pixel> pixels;
+
+    Pixel seedPixel = getPixel(seedCoords, renderer, surface);
+    Color seedColor = seedPixel.getColor();
+
+    pixels.push(seedPixel);
+
+    while (!pixels.empty()) {
+        Pixel currentPixel = pixels.front();
+
+        pixels.pop();
+
+        if (currentPixel.getColor() != seedColor) {
+            continue;
+        }
+
+        getNeighbours(currentPixel, renderer, surface, pixels);
+
+        paintPixel(currentPixel, color, renderer);
+    }
+
+    SDL_FreeSurface(surface);
+}
+
+void Utils::getNeighbours(Pixel pixel, SDL_Renderer* renderer, SDL_Surface* surface, std::queue<Pixel>& pixels) {
+    glm::ivec2 pixelCoords = pixel.getPosition();
+
+    // pixel on the left
+    {
+        glm::ivec2 pixelPosition = glm::ivec2(pixelCoords.x - 1, pixelCoords.y);
+        if (isPointInsideBounds(pixelPosition, screenBounds)) {
+            Pixel otherPixel = getPixel(pixelPosition, renderer, surface);
+            pixels.push(otherPixel);
+        }
+    }
+
+    // pixel on the right
+    {
+        glm::ivec2 pixelPosition = glm::ivec2(pixelCoords.x + 1, pixelCoords.y);
+        if (isPointInsideBounds(pixelPosition, screenBounds)) {
+            Pixel otherPixel = getPixel(pixelPosition, renderer, surface);
+            pixels.push(otherPixel);
+        }
+    }
+
+    // pixel on the top
+    {
+        glm::ivec2 pixelPosition = glm::ivec2(pixelCoords.x, pixelCoords.y - 1);
+        if (isPointInsideBounds(pixelPosition, screenBounds)) {
+            Pixel otherPixel = getPixel(pixelPosition, renderer, surface);
+            pixels.push(otherPixel);
+        }
+    }
+
+    // pixel on the bottom
+    {
+        glm::ivec2 pixelPosition = glm::ivec2(pixelCoords.x, pixelCoords.y + 1);
+        if (isPointInsideBounds(pixelPosition, screenBounds)) {
+            Pixel otherPixel = getPixel(pixelPosition, renderer, surface);
+            pixels.push(otherPixel);
+        }
+    }
+
+}
+
+Pixel Utils::getPixel(glm::ivec2 pixelCoords, SDL_Renderer* renderer, SDL_Surface* surface) {
+    SDL_Rect rect = { pixelCoords.x, pixelCoords.y, 1, 1 };
+    SDL_RenderReadPixels(renderer, &rect, SDL_PIXELFORMAT_RGBA32, surface->pixels, surface->pitch);
+
+    Uint32* pixel = (Uint32*)surface->pixels;
+
+    Uint8 r = 0;
+    Uint8 g = 0;
+    Uint8 b = 0;
+    Uint8 a = 0;
+
+    SDL_GetRGBA(*pixel, surface->format, &r, &g, &b, &a);
+    
+    return Pixel(Color(r, g, b, a), pixelCoords);
+}
+
+void Utils::paintPixel(Pixel pixel, Color color, SDL_Renderer* renderer) {
+    glm::ivec2 pixelCoords = pixel.getPosition();
+    SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+    SDL_RenderDrawPoint(renderer, pixelCoords.x, pixelCoords.y);
+}
+
+void Utils::paintPixel(Pixel pixel, SDL_Renderer* renderer) {
+    Color color = pixel.getColor();
+    glm::ivec2 pixelCoords = pixel.getPosition();
+    SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+    SDL_RenderDrawPoint(renderer, pixelCoords.x, pixelCoords.y);
 }
 
 SDL_Cursor* Utils::getCursor(ActionState state) {

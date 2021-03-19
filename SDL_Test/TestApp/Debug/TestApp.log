@@ -1,3 +1,11 @@
-﻿  MainFrame.cpp
-D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\MainFrame.cpp(372,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+﻿  ColorPicker.cpp
+  MainFrame.cpp
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\MainFrame.cpp(398,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  MainPanel.cpp
+  Utils.cpp
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(51,33): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(55,32): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(204,20): warning C4244: 'argument': conversion from 'float' to 'const unsigned int', possible loss of data
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(205,20): warning C4244: 'argument': conversion from 'float' to 'const unsigned int', possible loss of data
+  Generating Code...
   TestApp.vcxproj -> D:\Users\Jovan\C++\SDL_Testing\SDL_Test\Debug\TestApp.exe
