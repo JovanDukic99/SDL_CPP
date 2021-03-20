@@ -26,10 +26,12 @@ public:
 	static void paintWithBucket(glm::ivec2 seedCoords, Color color, SDL_Renderer* renderer);
 private:
 	static glm::fvec2 lerp(glm::fvec2 p1, glm::fvec2 p2, float t);
-	static void getNeighbours(Pixel pixel, SDL_Renderer* renderer, SDL_Surface* surface, std::queue<Pixel>& pixels);
-	static Pixel getPixel(glm::ivec2 pixelCoords, SDL_Renderer* renderer, SDL_Surface* surface);
-	static void paintPixel(Pixel pixel, Color color, SDL_Renderer* renderer);
+	static Pixel getPixel(glm::ivec2 position, SDL_Surface* surface);
+	static void getNeighbours(Pixel pixel, Color color, SDL_Surface* surface, std::queue<Pixel>& pixels);
+	static void getPixels(SDL_Renderer* renderer, SDL_Surface* surface);
 	static void paintPixel(Pixel pixel, SDL_Renderer* renderer);
+	static void paintPixel(Pixel pixel, Color color, SDL_Renderer* renderer);
+	static void paintSurfacePixel(Pixel pixel, SDL_Surface* surface);
 
 	template <typename T>
 	static bool contains(std::vector<T> vector, T value);

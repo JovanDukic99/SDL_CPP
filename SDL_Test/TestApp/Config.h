@@ -32,8 +32,8 @@ static const int PENCIL_CURSOR_HOT_Y = 29;
 static const int BUCKET_CURSOR_HOT_X = 13;
 static const int BUCKET_CURSOR_HOT_Y = 16;
 
-static const int RUBBER_CURSOR_HOT_X = 13;
-static const int RUBBER_CURSOR_HOT_Y = 31;
+static const int RUBBER_CURSOR_HOT_X = 16;
+static const int RUBBER_CURSOR_HOT_Y = 16;
 
 // rubber config
 static const int RUBBER_WIDTH = 32;

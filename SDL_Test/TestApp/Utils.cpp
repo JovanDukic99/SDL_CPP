@@ -1,9 +1,10 @@
 #include "Utils.h"
 #include "ImageLoader.h"
 #include "Config.h"
+#include <iostream>
 #include <queue>
 
-SDL_Rect Utils::screenBounds = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT};
+SDL_Rect Utils::screenBounds = {0, MAIN_PANEL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT};
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 Uint32 Utils::rmask = 0xff000000;
@@ -56,100 +57,71 @@ int Utils::calculatePositionFromRGBValue(int A, int B, int C, int D) {
 }
 
 void Utils::paintWithBucket(glm::ivec2 seedCoords, Color color, SDL_Renderer* renderer) {
-    SDL_Surface* surface = SDL_CreateRGBSurface(0, 1, 1, 32, rmask, gmask, bmask, amask);
+    SDL_Surface* surface = SDL_CreateRGBSurface(0, screenBounds.w, screenBounds.h, 32, rmask, gmask, bmask, amask);
+    getPixels(renderer, surface);
 
-    std::queue <Pixel> pixels;
-
-    Pixel seedPixel = getPixel(seedCoords, renderer, surface);
+    Pixel seedPixel = getPixel(seedCoords, surface);
     Color seedColor = seedPixel.getColor();
 
+    std::queue<Pixel> pixels;
     pixels.push(seedPixel);
 
-    while (!pixels.empty()) {
+    int i = 0;
+    while(i != 3600) {
         Pixel currentPixel = pixels.front();
 
         pixels.pop();
 
-        if (currentPixel.getColor() != seedColor) {
-            continue;
-        }
+        getNeighbours(currentPixel, seedColor, surface, pixels);
 
-        getNeighbours(currentPixel, renderer, surface, pixels);
+        currentPixel.setColor(color);
+        paintPixel(currentPixel, renderer);
+        paintSurfacePixel(currentPixel, surface);
 
-        paintPixel(currentPixel, color, renderer);
+        i++;
     }
 
     SDL_FreeSurface(surface);
 }
 
-void Utils::getNeighbours(Pixel pixel, SDL_Renderer* renderer, SDL_Surface* surface, std::queue<Pixel>& pixels) {
+void Utils::getNeighbours(Pixel pixel, Color color, SDL_Surface* surface, std::queue<Pixel>& pixels) {
     glm::ivec2 pixelCoords = pixel.getPosition();
 
     // pixel on the left
-    {
-        glm::ivec2 pixelPosition = glm::ivec2(pixelCoords.x - 1, pixelCoords.y);
-        if (isPointInsideBounds(pixelPosition, screenBounds)) {
-            Pixel otherPixel = getPixel(pixelPosition, renderer, surface);
-            pixels.push(otherPixel);
+    glm::ivec2 position = glm::ivec2(pixelCoords.x - 1, pixelCoords.y);
+    if (isPointInsideBounds(position, screenBounds)) {
+        pixel = getPixel(position, surface);
+        if (pixel.getColor() == color) {
+            pixels.push(getPixel(position, surface));
         }
     }
 
-    // pixel on the right
-    {
-        glm::ivec2 pixelPosition = glm::ivec2(pixelCoords.x + 1, pixelCoords.y);
-        if (isPointInsideBounds(pixelPosition, screenBounds)) {
-            Pixel otherPixel = getPixel(pixelPosition, renderer, surface);
-            pixels.push(otherPixel);
+    // pixel on the rigth
+    position = glm::ivec2(pixelCoords.x + 1, pixelCoords.y);
+    if (isPointInsideBounds(position, screenBounds)) {
+        pixel = getPixel(position, surface);
+        if (pixel.getColor() == color) {
+            pixels.push(getPixel(position, surface));
         }
     }
 
     // pixel on the top
-    {
-        glm::ivec2 pixelPosition = glm::ivec2(pixelCoords.x, pixelCoords.y - 1);
-        if (isPointInsideBounds(pixelPosition, screenBounds)) {
-            Pixel otherPixel = getPixel(pixelPosition, renderer, surface);
-            pixels.push(otherPixel);
+    position = glm::ivec2(pixelCoords.x, pixelCoords.y - 1);
+    if (isPointInsideBounds(position, screenBounds)) {
+        pixel = getPixel(position, surface);
+        if (pixel.getColor() == color) {
+            pixels.push(getPixel(position, surface));
         }
     }
 
     // pixel on the bottom
-    {
-        glm::ivec2 pixelPosition = glm::ivec2(pixelCoords.x, pixelCoords.y + 1);
-        if (isPointInsideBounds(pixelPosition, screenBounds)) {
-            Pixel otherPixel = getPixel(pixelPosition, renderer, surface);
-            pixels.push(otherPixel);
+    position = glm::ivec2(pixelCoords.x, pixelCoords.y + 1);
+    if (isPointInsideBounds(position, screenBounds)) {
+        pixel = getPixel(position, surface);
+        if (pixel.getColor() == color) {
+            pixels.push(getPixel(position, surface));
         }
     }
-
-}
-
-Pixel Utils::getPixel(glm::ivec2 pixelCoords, SDL_Renderer* renderer, SDL_Surface* surface) {
-    SDL_Rect rect = { pixelCoords.x, pixelCoords.y, 1, 1 };
-    SDL_RenderReadPixels(renderer, &rect, SDL_PIXELFORMAT_RGBA32, surface->pixels, surface->pitch);
-
-    Uint32* pixel = (Uint32*)surface->pixels;
-
-    Uint8 r = 0;
-    Uint8 g = 0;
-    Uint8 b = 0;
-    Uint8 a = 0;
-
-    SDL_GetRGBA(*pixel, surface->format, &r, &g, &b, &a);
-    
-    return Pixel(Color(r, g, b, a), pixelCoords);
-}
-
-void Utils::paintPixel(Pixel pixel, Color color, SDL_Renderer* renderer) {
-    glm::ivec2 pixelCoords = pixel.getPosition();
-    SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
-    SDL_RenderDrawPoint(renderer, pixelCoords.x, pixelCoords.y);
-}
-
-void Utils::paintPixel(Pixel pixel, SDL_Renderer* renderer) {
-    Color color = pixel.getColor();
-    glm::ivec2 pixelCoords = pixel.getPosition();
-    SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
-    SDL_RenderDrawPoint(renderer, pixelCoords.x, pixelCoords.y);
 }
 
 SDL_Cursor* Utils::getCursor(ActionState state) {
@@ -274,4 +246,45 @@ Color Utils::getButtonColor(int index) {
 
 glm::fvec2 Utils::lerp(glm::fvec2 p1, glm::fvec2 p2, float t) {
     return p1 * (1 - t) + p2 * t;
+}
+
+void Utils::getPixels(SDL_Renderer* renderer, SDL_Surface* surface) {
+    SDL_Rect rect = { screenBounds.x, screenBounds.y, screenBounds.w, screenBounds.h };
+    SDL_RenderReadPixels(renderer, &rect, SDL_PIXELFORMAT_RGBA32, surface->pixels, surface->pitch);
+}
+
+Pixel Utils::getPixel(glm::ivec2 position, SDL_Surface* surface) {
+    Uint32* pixel = (Uint32*)surface->pixels + (position.y - MAIN_PANEL_HEIGHT) * surface->pitch / 4 + position.x;
+
+    Uint8 r = 0;
+    Uint8 g = 0;
+    Uint8 b = 0;
+    Uint8 a = 0;
+
+    SDL_GetRGBA(*pixel, surface->format, &r, &g, &b, &a);
+
+    return Pixel(Color(r, g, b, a), position);
+}
+
+void Utils::paintPixel(Pixel pixel, SDL_Renderer* renderer) {
+    Color color = pixel.getColor();
+    glm::ivec2 pixelCoords = pixel.getPosition();
+    SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+    SDL_RenderDrawPoint(renderer, pixelCoords.x, pixelCoords.y);
+}
+
+void Utils::paintPixel(Pixel pixel, Color color, SDL_Renderer* renderer) {
+    glm::ivec2 pixelCoords = pixel.getPosition();
+    SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+    SDL_RenderDrawPoint(renderer, pixelCoords.x, pixelCoords.y);
+}
+
+void Utils::paintSurfacePixel(Pixel pixel, SDL_Surface* surface) {
+    glm::ivec2 position = pixel.getPosition();
+    Color color = pixel.getColor();
+
+    Uint32* pix = (Uint32*)surface->pixels + (position.y - MAIN_PANEL_HEIGHT) * surface->pitch / 4 + position.x;
+    *pix = SDL_MapRGBA(surface->format, color.getR(), color.getG(), color.getB(), color.getA());
+
+    pixel = getPixel(pixel.getPosition(), surface);
 }

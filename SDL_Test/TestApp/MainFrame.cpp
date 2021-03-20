@@ -184,122 +184,123 @@ void MainFrame::update() {
 		return;	
 	}
 
-	// should open colorPicker
-	if (!colorPicker.isVisible() && mainPanel.openColorPicker(inputManager)) {
-		colorPicker.init(mainPanel.getSelectedColor());
-		controller->setActionState(ActionState::NONE);
-		updateCursor();
-		return;
-	}
-
-	// update colorPicker
-	if (updateColorPicker()) {
-		return;
-	}
-
-	if (!controller->isNone() && mouseCoords.y < MAIN_PANEL_HEIGHT) {
-		controller->updatePreviousActionState();
-		controller->setActionState(ActionState::NONE);
-		controller->setScreenState(ScreenState::REFRESH);
-		updateCursor();
-		return;
-	}
-
-	if (inputManager.isKeyPressed(SDL_BUTTON_RIGHT)) {
-		controller->setScreenState(ScreenState::REFRESH);
-
-		glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
-
-		rubber.x = mouseCoords.x - RUBBER_CURSOR_HOT_X;
-		rubber.y = mouseCoords.y - RUBBER_CURSOR_HOT_Y;
-
-		end = mouseCoords;
-
-		std::vector<SDL_Rect> path = Utils::getLinePath(start, end, RUBBER_WIDTH, RUBBER_HEIGHT);
-
-		for (size_t i = 0; i < path.size(); i++) {
-			SDL_Rect bounds = path[i];
-
-			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			SDL_RenderFillRect(renderer, &bounds);
-		}
-
-		if (!controller->isEraseing()) {
-			controller->updatePreviousActionState();
-			controller->setActionState(ActionState::ERASING);
+		// should open colorPicker
+		if (!colorPicker.isVisible() && mainPanel.openColorPicker(inputManager)) {
+			colorPicker.init(mainPanel.getSelectedColor());
+			controller->setActionState(ActionState::NONE);
 			updateCursor();
+			return;
 		}
 
-		start = end;
+		// update colorPicker
+		if (updateColorPicker()) {
+			return;
+		}
 
-		return;
-	}
+		if (!controller->isNone() && mouseCoords.y < MAIN_PANEL_HEIGHT) {
+			controller->updatePreviousActionState();
+			controller->setActionState(ActionState::NONE);
+			controller->setScreenState(ScreenState::REFRESH);
+			updateCursor();
+			return;
+		}
 
-	if ((controller->isNone() || controller->isEraseing()) && mouseCoords.y >= MAIN_PANEL_HEIGHT) {
-		controller->setActionState(controller->getPreviousActionState());
-		controller->setScreenState(ScreenState::REFRESH);
-		updateCursor();
-		return;
-	}
-
-	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
-		if (mouseCoords.y < MAIN_PANEL_HEIGHT) {
-			if (mainPanel.update(inputManager)) {
-				controller->setScreenState(ScreenState::REFRESH);
-				drawHUD();
-				inputManager.releaseKey(SDL_BUTTON_LEFT);
-				return;
+		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
+			if (mouseCoords.y < MAIN_PANEL_HEIGHT) {
+				if (mainPanel.update(inputManager)) {
+					controller->setScreenState(ScreenState::REFRESH);
+					drawHUD();
+					inputManager.releaseKey(SDL_BUTTON_LEFT);
+					return;
+				}
 			}
 		}
-	}
 
-	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isBucketPainting()) {
-		std::cout << "XD";
-		Utils::paintWithBucket(mouseCoords, mainPanel.getSelectedColor(), renderer);
-		inputManager.releaseKey(SDL_BUTTON_LEFT);
-		return;
-	}
+		if (inputManager.isKeyPressed(SDL_BUTTON_RIGHT) && start.y > MAIN_PANEL_HEIGHT + RUBBER_CURSOR_HOT_Y) {
+			controller->setScreenState(ScreenState::REFRESH);
 
-	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && !inputManager.isMoving()) {
-		start = mouseCoords;
-	}
+			glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
 
-	if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && inputManager.isMoving()) {
-		controller->setScreenState(ScreenState::REFRESH);
-
-		if (mouseCoords.y >  MAIN_PANEL_HEIGHT) {
-			if(controller->isPainting()){
-			int brushSize = mainPanel.getBrushSize();
-			Color color = mainPanel.getSelectedColor();
-
-			int width = brushSize * UNIT_WIDTH / 20;
-			int height = brushSize * UNIT_WIDTH / 20;
-
-			int x = mouseCoords.x - width / 2;
-			int y = mouseCoords.y - height / 2;
+			rubber.x = mouseCoords.x - RUBBER_CURSOR_HOT_X;
+			rubber.y = mouseCoords.y - RUBBER_CURSOR_HOT_Y;
 
 			end = mouseCoords;
 
-			std::vector<SDL_Rect> path = Utils::getLinePath(start, end, width, height);
+			std::vector<SDL_Rect> path = Utils::getLinePath(start, end, RUBBER_WIDTH, RUBBER_HEIGHT);
 
 			for (size_t i = 0; i < path.size(); i++) {
 				SDL_Rect bounds = path[i];
 
-				SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+				SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 				SDL_RenderFillRect(renderer, &bounds);
 			}
 
-			inputManager.setMoving(false);
-
-			start = end;
-			}
-
-			if (controller->isEraseing()) {
-				controller->setActionState(ActionState::PAINTING);
+			if (!controller->isEraseing()) {
+				controller->updatePreviousActionState();
+				controller->setActionState(ActionState::ERASING);
 				updateCursor();
 			}
+
+			start = end;
+
+			return;
 		}
-	}
+
+		if ((controller->isNone() || controller->isEraseing()) && mouseCoords.y >= MAIN_PANEL_HEIGHT) {
+			controller->setActionState(controller->getPreviousActionState());
+			controller->setScreenState(ScreenState::REFRESH);
+			updateCursor();
+			return;
+		}
+
+		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isBucketPainting()) {
+			Utils::paintWithBucket(mouseCoords, mainPanel.getSelectedColor(), renderer);
+			controller->setScreenState(ScreenState::REFRESH);
+			inputManager.releaseKey(SDL_BUTTON_LEFT);
+			return;
+		}
+
+		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && !inputManager.isMoving()) {
+			start = mouseCoords;
+		}
+
+		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && inputManager.isMoving()) {
+			controller->setScreenState(ScreenState::REFRESH);
+
+			if (mouseCoords.y > MAIN_PANEL_HEIGHT) {
+				if (controller->isPainting()) {
+					int brushSize = mainPanel.getBrushSize();
+					Color color = mainPanel.getSelectedColor();
+
+					int width = brushSize * UNIT_WIDTH / 20;
+					int height = brushSize * UNIT_WIDTH / 20;
+
+					int x = mouseCoords.x - width / 2;
+					int y = mouseCoords.y - height / 2;
+
+					end = mouseCoords;
+
+					std::vector<SDL_Rect> path = Utils::getLinePath(start, end, width, height);
+
+					for (size_t i = 0; i < path.size(); i++) {
+						SDL_Rect bounds = path[i];
+
+						SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+						SDL_RenderFillRect(renderer, &bounds);
+					}
+
+					inputManager.setMoving(false);
+
+					start = end;
+				}
+
+				if (controller->isEraseing()) {
+					controller->setActionState(ActionState::PAINTING);
+					updateCursor();
+				}
+			}
+		}
+
 
 	inputManager.setClickNumber(0);
 }
