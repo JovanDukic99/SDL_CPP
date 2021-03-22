@@ -3,12 +3,12 @@
 #include "Color.h"
 #include <SDL/SDL_render.h>
 #include <SDL_TTF/SDL_ttf.h>
+#include <glm/glm.hpp>
 #include <string>	
 class Font
 {
 private:
 	TTF_Font* font;
-	
 public:
 	// constructors
 	Font();
@@ -18,8 +18,7 @@ public:
 	void init(std::string fontPath, int size);
 
 	// getters
-	SDL_Texture* getFontTexture(std::string text, Color color, SDL_Renderer* renderer);
-	SDL_Rect getTextBounds(std::string text, int x, int y);
+	void obtainTextData(std::string text, Color color, SDL_Renderer* renderer, SDL_Texture** texture, SDL_Rect* bounds, glm::ivec2 position);
 
 	// setters
 	void setFont(TTF_Font*& font);

@@ -2,7 +2,7 @@
 
 Controller* Controller::INSTANCE = nullptr;
 
-Controller::Controller() : actionState(ActionState::NONE), screenState(ScreenState::REFRESH), previousActionState(ActionState::PAINTING) {
+Controller::Controller() : mode(Mode::NONE), screenState(ScreenState::REFRESH), previousMode(Mode::PAINTING), textPosition(0, 0) {
 
 }
 
@@ -18,47 +18,83 @@ Controller* Controller::getInstance() {
     return INSTANCE;
 }
 
-ActionState Controller::getActionState() const {
-    return actionState;
+Mode Controller::getActionState() const {
+    return mode;
 }
 
-ActionState Controller::getPreviousActionState() const {
-    return previousActionState;
+Mode Controller::getPreviousActionState() const {
+    return previousMode;
 }
 
 ScreenState Controller::getScreenState() const {
     return screenState;
 }
 
+glm::ivec2 Controller::getTextPosition() const {
+    return textPosition;
+}
+
+glm::ivec2 Controller::getIndicatorPosition() const {
+    return indicatorPosition;
+}
+
+std::string Controller::getText() const {
+    return text;
+}
+
 bool Controller::isNone() const {
-    return actionState == ActionState::NONE;
+    return mode == Mode::NONE;
 }
 
 bool Controller::isPainting() const {
-    return actionState == ActionState::PAINTING;
+    return mode == Mode::PAINTING;
 }
 
 bool Controller::isEraseing() const {
-    return actionState == ActionState::ERASING;
+    return mode == Mode::ERASING;
 }
 
 bool Controller::isBucketPainting() const {
-    return actionState == ActionState::BUCKET_PAINTING;
+    return mode == Mode::BUCKET_PAINTING;
+}
+
+bool Controller::isWriting() const {
+    return mode == Mode::TEXT;
 }
 
 // setters
-void Controller::setActionState(ActionState actionState) {
-    this->actionState = actionState;
+void Controller::setMode(Mode actionState) {
+    this->mode = actionState;
 }
 
-void Controller::updatePreviousActionState() {
-    this->previousActionState = actionState;
+void Controller::updatePreviousMode() {
+    this->previousMode = mode;
 }
 
 void Controller::setScreenState(ScreenState screenState) {
     this->screenState = screenState;
 }
 
-void Controller::setPreviousActionState(ActionState previousActionState) {
-    this->previousActionState = previousActionState;
+void Controller::setPrevoiusMode(Mode previousActionState) {
+    this->previousMode = previousActionState;
+}
+
+void Controller::setTextPosition(glm::ivec2 textPosition) {
+    this->textPosition = textPosition;
+}
+
+void Controller::setIndicatorPosition(glm::ivec2 indicatorPosition) {
+    this->indicatorPosition = indicatorPosition;
+}
+
+void Controller::appendText(char* text) {
+    this->text.append(text);
+}
+
+bool Controller::removeCharacter() {
+    if (text.size() > 0) {
+        text.pop_back();
+        return true;
+    }
+    return false;
 }

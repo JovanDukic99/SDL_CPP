@@ -24,6 +24,8 @@ static const int MINUS_BUTTON_ID = 1;
 
 static const int PENCIL_BUTTON_ID = 2;
 static const int BUCKET_BUTTON_ID = 3;
+static const int RUBBER_BUTTON_ID = 4;
+static const int TEXT_BUTTON_ID = 5;
 
 // cursor config
 static const int PENCIL_CURSOR_HOT_X = 2;
@@ -71,13 +73,6 @@ static const int CURRENT_COLOR_PANEL_Y = COLOR_PANEL_START_Y;
 static const int CURRENT_COLOR_PANEL_WIDTH = UNIT_WIDTH;
 static const int CURRENT_COLOR_PANEL_HEIGHT = COLOR_PANEL_HEIGHT;
 
-// utility panel
-static const int UTILITY_PANEL_X = CURRENT_COLOR_PANEL_X + CURRENT_COLOR_PANEL_WIDTH + 5;
-static const int UTILITY_PANEL_Y = CURRENT_COLOR_PANEL_Y;
-
-static const int UTILITY_PANEL_WIDTH = CURRENT_COLOR_PANEL_WIDTH;
-static const int UTILITY_PANEL_HEIGHT = CURRENT_COLOR_PANEL_HEIGHT;
-
 // current color button
 static const int CURRENT_COLOR_BUTTON_X = CURRENT_COLOR_PANEL_X + 5;
 static const int CURRENT_COLOR_BUTTON_Y = CURRENT_COLOR_PANEL_Y + 5;
@@ -92,8 +87,15 @@ static const int UTILITY_BUTTON_START_Y = CURRENT_COLOR_BUTTON_Y;
 static const int UTILITY_BUTTON_WIDTH = COLOR_BUTTON_WIDTH;
 static const int UTILITY_BUTTON_HEIGHT = COLOR_BUTTON_HEIGHT;
 
-static const int UTILITY_BUTTON_HORIZONTAL_OFFSET = UTILITY_BUTTON_WIDTH + 5;
-static const int UTILITY_BUTTON_VERTICAL_OFFSET = UTILITY_BUTTON_HEIGHT + 5;
+static const int UTILITY_BUTTON_HORIZONTAL_OFFSET = COLOR_BUTTON_OFFSET;
+static const int UTILITY_BUTTON_VERTICAL_OFFSET = COLOR_BUTTON_OFFSET;
+
+// utility panel
+static const int UTILITY_PANEL_X = CURRENT_COLOR_PANEL_X + CURRENT_COLOR_PANEL_WIDTH + 5;
+static const int UTILITY_PANEL_Y = CURRENT_COLOR_PANEL_Y;
+
+static const int UTILITY_PANEL_WIDTH = 2 * UTILITY_BUTTON_WIDTH + 15;
+static const int UTILITY_PANEL_HEIGHT = COLOR_PANEL_HEIGHT;
 
 // brush button confit
 static const int PANEL_BUTTON_WIDTH = 64;
@@ -115,7 +117,10 @@ static const std::string BUCKET_CURSOR_PATH = "Assets/Textures/bucket_cursor.png
 static const std::string PENCIL_BUTTON_PATH = "Assets/Textures/pencil.png";
 static const std::string PENCIL_CURSOR_PATH = "Assets/Textures/pencil_cursor.png";
 
+static const std::string RUBBER_BUTTON_PATH = "Assets/Textures/rubber.png";
 static const std::string RUBBER_CURSOR_PATH = "Assets/Textures/rubber_cursor.png";
+
+static const std::string TEXT_BUTTON_PATH = "Assets/Textures/text.png";
 
 static const std::string FONT_PATH = "fonts/Roboto-Light.ttf";
 

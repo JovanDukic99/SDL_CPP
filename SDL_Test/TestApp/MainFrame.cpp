@@ -9,7 +9,7 @@
 #define MILISECONDS 1000
 #define DESIRED_FRAME_TIME (MILISECONDS / DESIRED_FPS)
 
-MainFrame::MainFrame() : gameState(GameState::PLAY) {
+MainFrame::MainFrame() : gameState(GameState::PLAY), writing(false), cooldown(0), show(true) {
 	init();
 }
 
@@ -95,7 +95,7 @@ void MainFrame::initComponents() {
 }
 
 void MainFrame::initFont() {
-	font.init(FONT_PATH, 48);
+	font.init(FONT_PATH, 32);
 }
 
 void MainFrame::run() {
@@ -108,8 +108,11 @@ void MainFrame::run() {
 		Uint32 endTime = SDL_GetTicks();
 		Uint32 frameTime = endTime - startTime;
 
+		timer.setFrameTime(frameTime);
+
 		if (DESIRED_FRAME_TIME > frameTime) {
 			SDL_Delay(DESIRED_FRAME_TIME - frameTime);
+			cooldown += DESIRED_FRAME_TIME - frameTime;
 			start = inputManager.getMouseCoordinates();
 		}
 	}
@@ -134,6 +137,13 @@ void MainFrame::handleInputEvents() {
 			inputManager.setMouseCoordinates(event.motion.x, event.motion.y);
 			inputManager.setWindowID(event.window.windowID);
 			break;
+		}
+		case SDL_TEXTINPUT: {
+			if (writing) {
+				append = true;
+				controller->appendText(event.text.text);
+				break;
+			}
 		}
 		case SDL_KEYDOWN: {
 			inputManager.pressKey(event.key.keysym.sym);
@@ -165,7 +175,7 @@ void MainFrame::handleWindowEvents(SDL_Event& event) {
 	{
 	case SDL_WINDOWEVENT_CLOSE: {
 		if (event.window.windowID != SDL_GetWindowID(window)) {
-			controller->setActionState(controller->getPreviousActionState());
+			controller->setMode(controller->getPreviousActionState());
 			updateCursor();
 			colorPicker.closeWindow();
 		}
@@ -184,10 +194,15 @@ void MainFrame::update() {
 		return;	
 	}
 
+	// update start position
+	if (!inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
+		start = mouseCoords;
+	}
+
 		// should open colorPicker
 		if (!colorPicker.isVisible() && mainPanel.openColorPicker(inputManager)) {
 			colorPicker.init(mainPanel.getSelectedColor());
-			controller->setActionState(ActionState::NONE);
+			controller->setMode(Mode::NONE);
 			updateCursor();
 			return;
 		}
@@ -197,18 +212,20 @@ void MainFrame::update() {
 			return;
 		}
 
+		// save previous state and switch to hand cursor
 		if (!controller->isNone() && mouseCoords.y < MAIN_PANEL_HEIGHT) {
-			controller->updatePreviousActionState();
-			controller->setActionState(ActionState::NONE);
-			controller->setScreenState(ScreenState::REFRESH);
+			controller->updatePreviousMode();
+			controller->setMode(Mode::NONE);
+			refresh();
 			updateCursor();
 			return;
 		}
 
+		// check if update happend in mainPanel
 		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
 			if (mouseCoords.y < MAIN_PANEL_HEIGHT) {
 				if (mainPanel.update(inputManager)) {
-					controller->setScreenState(ScreenState::REFRESH);
+					refresh();
 					drawHUD();
 					inputManager.releaseKey(SDL_BUTTON_LEFT);
 					return;
@@ -216,8 +233,42 @@ void MainFrame::update() {
 			}
 		}
 
-		if (inputManager.isKeyPressed(SDL_BUTTON_RIGHT) && start.y > MAIN_PANEL_HEIGHT + RUBBER_CURSOR_HOT_Y) {
+		// switch to previous state
+		if (controller->isNone() && mouseCoords.y >= MAIN_PANEL_HEIGHT) {
+			controller->setMode(controller->getPreviousActionState());
 			controller->setScreenState(ScreenState::REFRESH);
+			updateCursor();
+			return;
+		}
+
+		// writing
+		if (!writing && inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isWriting()) {
+			takeScreenShot();
+			writing = true;
+			controller->setTextPosition(mouseCoords);
+			controller->setIndicatorPosition(mouseCoords);
+			cooldown = 0;
+			show = true;
+			inputManager.releaseKey(SDL_BUTTON_LEFT);
+		}
+		else if (writing && inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
+			hideIndicator();
+			writing = false;
+		}
+
+		// hide and seek
+		if (writing) {
+			if (inputManager.isKeyPressed(SDLK_BACKSPACE) && controller->removeCharacter()) {
+				append = true;
+			}
+			drawIndicator();
+			drawText();
+			return;
+		}
+
+		// erasing
+		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isEraseing() && inputManager.isMoving()) {
+			refresh();
 
 			glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
 
@@ -235,37 +286,22 @@ void MainFrame::update() {
 				SDL_RenderFillRect(renderer, &bounds);
 			}
 
-			if (!controller->isEraseing()) {
-				controller->updatePreviousActionState();
-				controller->setActionState(ActionState::ERASING);
-				updateCursor();
-			}
-
 			start = end;
 
 			return;
 		}
-
-		if ((controller->isNone() || controller->isEraseing()) && mouseCoords.y >= MAIN_PANEL_HEIGHT) {
-			controller->setActionState(controller->getPreviousActionState());
-			controller->setScreenState(ScreenState::REFRESH);
-			updateCursor();
-			return;
-		}
-
+		
+		// bucket painting
 		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isBucketPainting()) {
 			Utils::paintWithBucket(mouseCoords, mainPanel.getSelectedColor(), renderer);
-			controller->setScreenState(ScreenState::REFRESH);
+			refresh();
 			inputManager.releaseKey(SDL_BUTTON_LEFT);
 			return;
 		}
 
-		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && !inputManager.isMoving()) {
-			start = mouseCoords;
-		}
-
-		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && inputManager.isMoving()) {
-			controller->setScreenState(ScreenState::REFRESH);
+		// painting
+		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isPainting() && inputManager.isMoving()) {
+			refresh();
 
 			if (mouseCoords.y > MAIN_PANEL_HEIGHT) {
 				if (controller->isPainting()) {
@@ -293,14 +329,8 @@ void MainFrame::update() {
 
 					start = end;
 				}
-
-				if (controller->isEraseing()) {
-					controller->setActionState(ActionState::PAINTING);
-					updateCursor();
-				}
 			}
 		}
-
 
 	inputManager.setClickNumber(0);
 }
@@ -377,8 +407,9 @@ void MainFrame::drawHUD() {
 
 	// draw brush label
 	std::string brushLabel = std::to_string(mainPanel.getBrushSize());
-	SDL_Texture* texture = font.getFontTexture(brushLabel, WHITE, renderer);
-	SDL_Rect labelBounds = font.getTextBounds(brushLabel, BRUSH_LABEL_X, BRUSH_LABEL_Y);
+	SDL_Texture* texture = nullptr;
+	SDL_Rect labelBounds;
+	font.obtainTextData(brushLabel, BLACK, renderer, &texture, &labelBounds, glm::ivec2(BRUSH_LABEL_X, BRUSH_LABEL_Y));
 
 	SDL_RenderCopy(renderer, texture, NULL, &labelBounds);
 }
@@ -458,13 +489,98 @@ void MainFrame::drawCircle(int originX, int originY, int radius) {
 	}
 }
 
-void MainFrame::updateScreen() {
-	if (refresh()) {
-		SDL_RenderPresent(renderer);
-		controller->setScreenState(ScreenState::FREEZE);
+void MainFrame::drawIndicator() {
+	cooldown += timer.getFrameTime();
+
+	if (cooldown >= 800) {
+		if (show) {
+			showIndicator();
+		}
+		else {
+			hideIndicator();
+		}
+		cooldown = 0;
 	}
 }
 
-bool MainFrame::refresh() {
+void MainFrame::showIndicator() {
+	glm::ivec2 position = controller->getIndicatorPosition();
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderDrawLine(renderer, position.x, position.y - 10, position.x, position.y + 10);
+	refresh();
+	show = false;
+}
+
+void MainFrame::hideIndicator() {
+	glm::ivec2 position = controller->getIndicatorPosition();
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_RenderDrawLine(renderer, position.x, position.y - 10, position.x, position.y + 10);
+	refresh();
+	show = true;
+}
+
+void MainFrame::drawText() {
+	if (append) {
+		SDL_Rect dest = { 0, MAIN_PANEL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT };
+		SDL_RenderCopy(renderer, screenShot, NULL, &dest);
+		controller->setIndicatorPosition(controller->getTextPosition());
+
+		glm::ivec2 position = controller->getTextPosition();
+
+		std::string text = controller->getText();
+
+		SDL_Texture* fontTexture = nullptr;
+		SDL_Rect textBounds;
+
+		font.obtainTextData(text, mainPanel.getSelectedColor(), renderer, &fontTexture, &textBounds, position);
+
+		if (fontTexture == nullptr) {
+			append = false;
+			return;
+		}
+
+		textBounds.y = textBounds.y - textBounds.h / 2;
+
+		SDL_RenderCopy(renderer, fontTexture, NULL, &textBounds);
+		SDL_DestroyTexture(fontTexture);
+		refresh();
+
+		glm::ivec2 pos = controller->getIndicatorPosition();
+		controller->setIndicatorPosition(glm::ivec2(pos.x + textBounds.w, pos.y));
+
+		append = false;
+	}
+}
+
+void MainFrame::updateScreen() {
+	if (doRefresh()) {
+		SDL_RenderPresent(renderer);
+		freeze();
+	}
+}
+
+bool MainFrame::doRefresh() {
 	return controller->getScreenState() == ScreenState::REFRESH;
+}
+
+void MainFrame::refresh() {
+	controller->setScreenState(ScreenState::REFRESH);
+}
+
+void MainFrame::freeze() {
+	controller->setScreenState(ScreenState::FREEZE);
+}
+
+void MainFrame::takeScreenShot() {
+	SDL_Surface* sshot = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+
+	SDL_Rect rect = {0, MAIN_PANEL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT};
+
+	SDL_RenderReadPixels(renderer, &rect, SDL_PIXELFORMAT_ARGB8888, sshot->pixels, sshot->pitch);
+
+	if ((screenShot = SDL_CreateTextureFromSurface(renderer, sshot)) == nullptr) {
+		std::cout << "Screenshot creation failed." << std::endl;
+	}
+
+	SDL_FreeSurface(sshot);
 }

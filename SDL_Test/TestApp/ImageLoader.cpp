@@ -48,22 +48,15 @@ SDL_Surface* ImageLoader::loadCursorSurface(std::string filePath) {
 	return loadedSurface;
 }
 
-SDL_Texture* ImageLoader::getFontTexture(std::string text, TTF_Font* font, Color color, SDL_Renderer* renderer) {
+SDL_Surface* ImageLoader::getFontSurface(std::string text, TTF_Font* font, Color color) {
 	SDL_Color colorFG{ color.getR(), color.getG(), color.getB(), color.getA()};
 	SDL_Surface* textSurface = nullptr;
-	SDL_Texture* texture = nullptr;
 
-	if ((textSurface = TTF_RenderUTF8_Blended(font, text.c_str(), colorFG)) != nullptr) {
-		if ((texture = SDL_CreateTextureFromSurface(renderer, textSurface)) == nullptr) {
-			std::cout << "SDL_BlitSurface has failed." << std::endl;
-		}
-		SDL_FreeSurface(textSurface);
-	}
-	else {
+	if ((textSurface = TTF_RenderUTF8_Blended(font, text.c_str(), colorFG)) == nullptr) {
 		std::cout << "TTF_RenderText_Solid has failed." << std::endl;
 	}
 
-	return texture;
+	return textSurface;
 }
 
 SDL_Surface* ImageLoader::findSurface(std::string filePath) {

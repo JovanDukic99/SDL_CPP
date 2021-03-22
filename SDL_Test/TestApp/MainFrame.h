@@ -4,6 +4,7 @@
 #include "ColorPicker.h"
 #include "Font.h"
 #include "Controller.h"
+#include "Timer.h"
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
 #include <SDL_IMAGE/SDL_image.h>
@@ -28,8 +29,14 @@ private:
 	Font font;
 	SDL_Rect rubber;
 	MainPanel mainPanel;
+	Timer timer;
 	glm::ivec2 start;
 	glm::ivec2 end;
+	bool writing;
+	bool show;
+	bool append;
+	Uint32 cooldown;
+	SDL_Texture* screenShot;
 public:
 	MainFrame();
 	~MainFrame();
@@ -50,7 +57,14 @@ private:
 	void drawHUD();
 	void updateCursor();
 	void drawCircle(int x, int y, int radius);
+	void drawIndicator();
+	void showIndicator();
+	void hideIndicator();
+	void drawText();
 	void updateScreen();
-	bool refresh();
+	void refresh();
+	void freeze();
+	void takeScreenShot();
+	bool doRefresh();
 };
 

@@ -267,23 +267,18 @@ void ColorPicker::draw() {
 	SDL_RenderFillRect(renderer, &bounds);
 
 	// draw red label
-	SDL_Texture* texture = font.getFontTexture(redLabel, BLACK, renderer);
-	bounds = font.getTextBounds(redLabel, LABEL_START_X, LABEL_START_Y);
-
+	SDL_Texture* texture = nullptr;
+	font.obtainTextData(redLabel, BLACK, renderer, &texture, &bounds, glm::ivec2(LABEL_START_X, LABEL_START_Y));
 	SDL_RenderCopy(renderer, texture, NULL, &bounds);
 	SDL_DestroyTexture(texture);
 
 	// draw green label
-	texture = font.getFontTexture(greenLabel, BLACK, renderer);
-	bounds = font.getTextBounds(greenLabel, LABEL_START_X, LABEL_START_Y +  LABEL_OFFSET);
-
+	font.obtainTextData(greenLabel, BLACK, renderer, &texture, &bounds, glm::ivec2(LABEL_START_X, LABEL_START_Y + LABEL_OFFSET));
 	SDL_RenderCopy(renderer, texture, NULL, &bounds);
 	SDL_DestroyTexture(texture);
 
 	// draw blue label
-	texture = font.getFontTexture(blueLabel, BLACK, renderer);
-	bounds = font.getTextBounds(blueLabel, LABEL_START_X, LABEL_START_Y + 2 * LABEL_OFFSET);
-
+	font.obtainTextData(blueLabel, BLACK, renderer, &texture, &bounds, glm::ivec2(LABEL_START_X, LABEL_START_Y + 2 * LABEL_OFFSET));
 	SDL_RenderCopy(renderer, texture, NULL, &bounds);
 	SDL_DestroyTexture(texture);
 
@@ -295,8 +290,7 @@ void ColorPicker::draw() {
 	SDL_RenderFillRect(renderer, &bounds);
 
 	// draw submit button
-	texture = font.getFontTexture(SUBMIT_BUTTON, BLACK, renderer);
-	bounds = {bounds.x + 5 , bounds.y + 5, bounds.w - 10, bounds.h - 10};
+	font.obtainTextData(SUBMIT_BUTTON, BLACK, renderer, &texture, &bounds, glm::ivec2(LABEL_START_X, LABEL_START_Y + 2 * LABEL_OFFSET));
 
 	SDL_RenderCopy(renderer, texture, NULL, &bounds);
 	SDL_DestroyTexture(texture);

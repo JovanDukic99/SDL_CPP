@@ -124,20 +124,23 @@ void Utils::getNeighbours(Pixel pixel, Color color, SDL_Surface* surface, std::q
     }
 }
 
-SDL_Cursor* Utils::getCursor(ActionState state) {
+SDL_Cursor* Utils::getCursor(Mode state) {
     switch (state)
     {
-    case ActionState::NONE: {
+    case Mode::NONE: {
         return SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
     }
-    case ActionState::PAINTING: {
+    case Mode::PAINTING: {
         return SDL_CreateColorCursor(ImageLoader::loadCursorSurface(PENCIL_CURSOR_PATH), PENCIL_CURSOR_HOT_X, PENCIL_CURSOR_HOT_Y);
     }
-    case ActionState::ERASING: {
+    case Mode::ERASING: {
         return SDL_CreateColorCursor(ImageLoader::loadCursorSurface(RUBBER_CURSOR_PATH), RUBBER_CURSOR_HOT_X, RUBBER_CURSOR_HOT_Y);
     }
-    case ActionState::BUCKET_PAINTING: {
+    case Mode::BUCKET_PAINTING: {
         return SDL_CreateColorCursor(ImageLoader::loadCursorSurface(BUCKET_CURSOR_PATH), BUCKET_CURSOR_HOT_X, BUCKET_CURSOR_HOT_Y);
+    }
+    case Mode::TEXT: {
+        return SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
     }
     default:
         return SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
@@ -287,4 +290,59 @@ void Utils::paintSurfacePixel(Pixel pixel, SDL_Surface* surface) {
     *pix = SDL_MapRGBA(surface->format, color.getR(), color.getG(), color.getB(), color.getA());
 
     pixel = getPixel(pixel.getPosition(), surface);
+}
+
+void Utils::setUtilityButton(int index, SDL_Renderer* renderer, SDL_Texture** texture, int* ID) {
+    switch (index)
+    {
+    case 0: {
+        *texture = ImageLoader::loadTexture(PENCIL_BUTTON_PATH, renderer);
+        *ID = PENCIL_BUTTON_ID;
+        break;
+    }
+    case 1: {
+        *texture = ImageLoader::loadTexture(BUCKET_BUTTON_PATH, renderer);
+        *ID = BUCKET_BUTTON_ID;
+        break;
+    }
+    case 2: {
+        *texture = ImageLoader::loadTexture(RUBBER_BUTTON_PATH, renderer);
+        *ID = RUBBER_BUTTON_ID;
+        break;
+    }
+    case 3: {
+        *texture = ImageLoader::loadTexture(TEXT_BUTTON_PATH, renderer);
+        *ID = TEXT_BUTTON_ID;
+        break;
+    }
+    default:
+        *texture = ImageLoader::loadTexture(PENCIL_BUTTON_PATH, renderer);
+        *ID = PENCIL_BUTTON_ID;
+        break;
+    }
+}
+
+void Utils::setActionState(int ID) {
+    switch (ID)
+    {
+    case PENCIL_BUTTON_ID: {
+        Controller::getInstance()->setMode(Mode::PAINTING);
+        break;
+    }
+    case BUCKET_BUTTON_ID: {
+        Controller::getInstance()->setMode(Mode::BUCKET_PAINTING);
+        break;
+    }
+    case RUBBER_BUTTON_ID: {
+        Controller::getInstance()->setMode(Mode::ERASING);
+        break;
+    }
+    case TEXT_BUTTON_ID: {
+        Controller::getInstance()->setMode(Mode::TEXT);
+        break;
+    }
+    default:
+        Controller::getInstance()->setMode(Mode::PAINTING);
+        break;
+    }
 }

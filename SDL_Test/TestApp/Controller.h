@@ -1,10 +1,13 @@
 #pragma once
+#include <glm/glm.hpp>
+#include <string>
 
-enum class ActionState {
+enum class Mode {
 	NONE,
 	PAINTING,
 	ERASING,
-	BUCKET_PAINTING
+	BUCKET_PAINTING,
+	TEXT
 };
 
 enum class ScreenState {
@@ -16,9 +19,12 @@ class Controller
 {
 private:
 	static Controller* INSTANCE;
-	ActionState actionState;
-	ActionState previousActionState;
+	Mode mode;
+	Mode previousMode;
 	ScreenState screenState;
+	glm::ivec2 textPosition;
+	glm::ivec2 indicatorPosition;
+	std::string text;
 private:
 	Controller();
 	~Controller();
@@ -26,18 +32,26 @@ public:
 	static Controller* getInstance();
 
 	// getters
-	ActionState getActionState() const;
-	ActionState getPreviousActionState() const;
+	Mode getActionState() const;
+	Mode getPreviousActionState() const;
 	ScreenState getScreenState() const;
+	glm::ivec2 getTextPosition() const;
+	glm::ivec2 getIndicatorPosition() const;
+	std::string getText() const;
 	bool isNone() const;
 	bool isPainting() const;
 	bool isEraseing() const;
 	bool isBucketPainting() const;
+	bool isWriting() const;
 
 	// setters
-	void setActionState(ActionState actionState);
+	void setMode(Mode actionState);
 	void setScreenState(ScreenState screenState);
-	void setPreviousActionState(ActionState previousActionState);
-	void updatePreviousActionState();
+	void setPrevoiusMode(Mode previousActionState);
+	void setTextPosition(glm::ivec2 textPosition);
+	void setIndicatorPosition(glm::ivec2 indicatorPosition);
+	void appendText(char* text);
+	bool removeCharacter();
+	void updatePreviousMode();
 };
 

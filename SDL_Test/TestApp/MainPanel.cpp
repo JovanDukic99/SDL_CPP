@@ -53,7 +53,7 @@ void MainPanel::initPanels() {
 
 	panels.emplace_back(currentColorPanel, GRAY);
 
-	// ================= <Current Color Panel> ================= //
+	// ================= <Utility Panel> ================= //
 	SDL_Rect utilityPanel;
 
 	utilityPanel.w = UTILITY_PANEL_WIDTH;
@@ -117,26 +117,27 @@ void MainPanel::initButtons() {
 	}
 
 	// ================= <Utility Buttons> ================= //
-	utilityButtons.reserve(2);
+	utilityButtons.reserve(4);
+	int index = 0;
 	for (size_t i = 0; i < 2; i++) {
-		SDL_Texture* texture = nullptr;
+		for (size_t j = 0; j < 2; j++) {
+			SDL_Texture* texture = nullptr;
+			int ID = 0;
 
-		if (i == 0) {
-			texture = ImageLoader::loadTexture(PENCIL_BUTTON_PATH, renderer);
+			Utils::setUtilityButton(index, renderer, &texture, &ID);
+
+			SDL_Rect bounds;
+
+			bounds.w = UTILITY_BUTTON_WIDTH;
+			bounds.h = UTILITY_BUTTON_HEIGHT;
+
+			bounds.x = UTILITY_BUTTON_START_X + j * UTILITY_BUTTON_HORIZONTAL_OFFSET;
+			bounds.y = UTILITY_BUTTON_START_Y + i * UTILITY_BUTTON_VERTICAL_OFFSET;
+
+			utilityButtons.emplace_back(bounds, GREEN, texture, ID);
+
+			index++;
 		}
-		else {
-			texture = ImageLoader::loadTexture(BUCKET_BUTTON_PATH, renderer);
-		}
-
-		SDL_Rect bounds;
-
-		bounds.w = UTILITY_BUTTON_WIDTH;
-		bounds.h = UTILITY_BUTTON_HEIGHT;
-
-		bounds.x = UTILITY_BUTTON_START_X + i * UTILITY_BUTTON_HORIZONTAL_OFFSET;
-		bounds.y = UTILITY_BUTTON_START_Y;
-
-		utilityButtons.emplace_back(bounds, GREEN, texture, i + 2);
 	}
 }
 
@@ -187,13 +188,7 @@ bool MainPanel::updateBrushButtons(InputManager inputManager) {
 bool MainPanel::updateUtilityButtons(InputManager inputManager) {
 	for (size_t i = 0; i < utilityButtons.size(); i++) {
 		if (Utils::isPointInsideBounds(inputManager.getMouseCoordinates(), utilityButtons[i].getBounds())) {
-			int ID = utilityButtons[i].getID();
-			if (ID == PENCIL_BUTTON_ID) {
-				controller->setPreviousActionState(ActionState::PAINTING);
-			}
-			else if (ID == BUCKET_BUTTON_ID) {
-				controller->setPreviousActionState(ActionState::BUCKET_PAINTING);
-			}
+			Utils::setActionState(utilityButtons[i].getID());
 			return true;
 		}
 	}

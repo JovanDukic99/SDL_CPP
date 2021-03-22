@@ -22,38 +22,21 @@ void Font::loadFont(std::string fontPath, int size) {
 }
 
 // getters
-SDL_Texture* Font::getFontTexture(std::string text, Color color, SDL_Renderer* renderer) {
-	return ImageLoader::getFontTexture(text, font, color, renderer);
-}
+void Font::obtainTextData(std::string text, Color color, SDL_Renderer* renderer, SDL_Texture** texture, SDL_Rect* bounds, glm::ivec2 position) {
+	SDL_Surface* fontSurface = ImageLoader::getFontSurface(text, font, color);
 
-SDL_Rect Font::getTextBounds(std::string text, int x, int y) {
-	SDL_Rect bounds;
-
-	const char* chars = text.c_str();
-
-	int width = 0, maxHeight = INT_MAX;
-	int minx, maxx, miny, maxy, advance, glyphHeight;
-
-	for (size_t i = 0; i < text.size(); i++) {
-		if (TTF_GlyphMetrics(font, chars[i], &minx, &maxx, &miny, &maxy, &advance) == -1) {
-			std::cout << "There is no glyph metrics for char: " << chars[i] << std::endl;
-			continue;
-		}
-
-		width += maxx - minx;
-		glyphHeight = maxy - miny;
-
-		if (glyphHeight < maxHeight) {
-			maxHeight = glyphHeight;
-		}
+	if (fontSurface == nullptr) {
+		return;
 	}
 
-	bounds.x = x - width / 2;
-	bounds.y = y - maxHeight / 2;
-	bounds.w = width;
-	bounds.h = maxHeight;
+	// set up text position
+	*bounds = {position.x, position.y, fontSurface->w, fontSurface->h};
 
-	return bounds;
+	if ((*texture = SDL_CreateTextureFromSurface(renderer, fontSurface)) == nullptr) {
+		std::cout << "SDL_CreateTextureFromSurface has failed." << std::endl;
+	}
+
+	SDL_FreeSurface(fontSurface);
 }
 
 void Font::setFont(TTF_Font*& font) {

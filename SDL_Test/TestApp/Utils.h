@@ -20,10 +20,12 @@ public:
 	static bool isPointInsideBounds(glm::ivec2 mouseCoords, SDL_Rect bounds);
 	static int calculateRGBValueFromPositon(int x, int A, int B, int C);
 	static int calculatePositionFromRGBValue(int A, int B, int C, int D);
-	static SDL_Cursor* getCursor(ActionState state);
+	static SDL_Cursor* getCursor(Mode state);
 	static std::vector<SDL_Rect> getLinePath(glm::ivec2 p1, glm::ivec2 p2, int pathWidth, int pathHeight);
 	static Color getButtonColor(int index);
 	static void paintWithBucket(glm::ivec2 seedCoords, Color color, SDL_Renderer* renderer);
+	static void setUtilityButton(int index, SDL_Renderer* renderer, SDL_Texture** texture, int* ID);
+	static void setActionState(int ID);
 private:
 	static glm::fvec2 lerp(glm::fvec2 p1, glm::fvec2 p2, float t);
 	static Pixel getPixel(glm::ivec2 position, SDL_Surface* surface);

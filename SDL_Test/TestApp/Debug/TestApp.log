@@ -1,3 +1,3 @@
 ﻿  MainFrame.cpp
-D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\MainFrame.cpp(399,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\MainFrame.cpp(430,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
   TestApp.vcxproj -> D:\Users\Jovan\C++\SDL_Testing\SDL_Test\Debug\TestApp.exe
