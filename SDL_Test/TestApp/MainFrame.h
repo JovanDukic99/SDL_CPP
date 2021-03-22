@@ -35,7 +35,12 @@ private:
 	bool writing;
 	bool show;
 	bool append;
+	bool backspacePressed;
+	bool leftPressed;
+	bool rightPressed;
+	int appendIndex;
 	Uint32 cooldown;
+	Uint32 buttonTimer;
 	SDL_Texture* screenShot;
 public:
 	MainFrame();
@@ -65,6 +70,7 @@ private:
 	void refresh();
 	void freeze();
 	void takeScreenShot();
+	void drawScreenShot();
 	bool doRefresh();
 };
 

@@ -9,7 +9,7 @@
 #define MILISECONDS 1000
 #define DESIRED_FRAME_TIME (MILISECONDS / DESIRED_FPS)
 
-MainFrame::MainFrame() : gameState(GameState::PLAY), writing(false), cooldown(0), show(true) {
+MainFrame::MainFrame() : gameState(GameState::PLAY), writing(false), cooldown(0), buttonTimer(0), show(true), backspacePressed(false), appendIndex(0) {
 	init();
 }
 
@@ -141,7 +141,7 @@ void MainFrame::handleInputEvents() {
 		case SDL_TEXTINPUT: {
 			if (writing) {
 				append = true;
-				controller->appendText(event.text.text);
+				controller->appendText(event.text.text, appendIndex);
 				break;
 			}
 		}
@@ -245,6 +245,8 @@ void MainFrame::update() {
 		if (!writing && inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isWriting()) {
 			takeScreenShot();
 			writing = true;
+			controller->resetText();
+			appendIndex = 0;
 			controller->setTextPosition(mouseCoords);
 			controller->setIndicatorPosition(mouseCoords);
 			cooldown = 0;
@@ -254,15 +256,73 @@ void MainFrame::update() {
 		else if (writing && inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
 			hideIndicator();
 			writing = false;
+			
+		}
+		else if (!controller->isWriting()) {
+			writing = false;
+			hideIndicator();
 		}
 
 		// hide and seek
 		if (writing) {
-			if (inputManager.isKeyPressed(SDLK_BACKSPACE) && controller->removeCharacter()) {
+			if (!backspacePressed && inputManager.isKeyPressed(SDLK_BACKSPACE) && controller->removeCharacter()) {
+				buttonTimer = 0;
+				backspacePressed = true;
 				append = true;
 			}
-			drawIndicator();
+			else if (!leftPressed && inputManager.isKeyPressed(SDLK_LEFT)) {
+				leftPressed = true;
+				buttonTimer = 0;
+				if (appendIndex - 1 > 0) {
+					appendIndex--;
+				}
+			}
+			else if (!rightPressed && inputManager.isKeyPressed(SDLK_RIGHT)) {
+				rightPressed = true;
+				buttonTimer = 0;
+				if (appendIndex + 1 < controller->getText().size()) {
+					appendIndex++;
+				}
+			}
+			else if (backspacePressed && inputManager.isKeyPressed(SDLK_BACKSPACE)) {
+				if (buttonTimer > 15 && controller->removeCharacter()) {
+					append = true;
+				}
+				else {
+					buttonTimer += timer.getFrameTime();
+				}
+			}
+			else if (leftPressed && inputManager.isKeyPressed(SDLK_LEFT)) {
+				if (buttonTimer > 15) {
+					if (appendIndex - 1 > 0) {
+						appendIndex--;
+					}
+				}
+				else {
+					buttonTimer += timer.getFrameTime();
+				}
+			}
+			else if(rightPressed && inputManager.isKeyPressed(SDLK_RIGHT)) {
+				if (buttonTimer > 15) {
+					if (appendIndex + 1 < controller->getText().size()) {
+						appendIndex++;
+					}
+				}
+				else {
+					buttonTimer += timer.getFrameTime();
+				}	
+			}
+			else if (!inputManager.isKeyPressed(SDLK_BACKSPACE)) {
+				backspacePressed = false;
+			}
+			else if (!inputManager.isKeyPressed(SDLK_LEFT)) {
+				leftPressed = false;
+			}
+			else if (!inputManager.isKeyPressed(SDLK_RIGHT)) {
+				rightPressed = false;
+			}
 			drawText();
+			drawIndicator();
 			return;
 		}
 
@@ -521,23 +581,23 @@ void MainFrame::hideIndicator() {
 
 void MainFrame::drawText() {
 	if (append) {
-		SDL_Rect dest = { 0, MAIN_PANEL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT };
-		SDL_RenderCopy(renderer, screenShot, NULL, &dest);
+		drawScreenShot();
 		controller->setIndicatorPosition(controller->getTextPosition());
 
 		glm::ivec2 position = controller->getTextPosition();
-
 		std::string text = controller->getText();
+
+		if(text.empty()){
+			append = false;
+			appendIndex = 0;
+			refresh();
+			return;
+		}
 
 		SDL_Texture* fontTexture = nullptr;
 		SDL_Rect textBounds;
 
 		font.obtainTextData(text, mainPanel.getSelectedColor(), renderer, &fontTexture, &textBounds, position);
-
-		if (fontTexture == nullptr) {
-			append = false;
-			return;
-		}
 
 		textBounds.y = textBounds.y - textBounds.h / 2;
 
@@ -549,6 +609,13 @@ void MainFrame::drawText() {
 		controller->setIndicatorPosition(glm::ivec2(pos.x + textBounds.w, pos.y));
 
 		append = false;
+
+		if (leftPressed || rightPressed) {
+			appendIndex++;
+		}
+		else {
+			appendIndex = text.size();
+		}
 	}
 }
 
@@ -583,4 +650,9 @@ void MainFrame::takeScreenShot() {
 	}
 
 	SDL_FreeSurface(sshot);
+}
+
+void MainFrame::drawScreenShot() {
+	SDL_Rect dest = { 0, MAIN_PANEL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT };
+	SDL_RenderCopy(renderer, screenShot, NULL, &dest);
 }

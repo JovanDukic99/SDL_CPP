@@ -87,12 +87,16 @@ void Controller::setIndicatorPosition(glm::ivec2 indicatorPosition) {
     this->indicatorPosition = indicatorPosition;
 }
 
-void Controller::appendText(char* text) {
-    this->text.append(text);
+void Controller::appendText(char* newText, int index) {
+    text.insert(index, newText);
+}
+
+void Controller::resetText(){
+    text = "";
 }
 
 bool Controller::removeCharacter() {
-    if (text.size() > 0) {
+    if (!text.empty()) {
         text.pop_back();
         return true;
     }

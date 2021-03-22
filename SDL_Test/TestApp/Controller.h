@@ -50,7 +50,8 @@ public:
 	void setPrevoiusMode(Mode previousActionState);
 	void setTextPosition(glm::ivec2 textPosition);
 	void setIndicatorPosition(glm::ivec2 indicatorPosition);
-	void appendText(char* text);
+	void appendText(char* newText, int index);
+	void resetText();
 	bool removeCharacter();
 	void updatePreviousMode();
 };
