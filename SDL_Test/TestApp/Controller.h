@@ -1,4 +1,5 @@
 #pragma once
+#include "InputManager.h"
 #include <glm/glm.hpp>
 #include <string>
 
@@ -21,6 +22,7 @@ private:
 	static Controller* INSTANCE;
 	Mode mode;
 	Mode previousMode;
+	InputManager inputManager;
 	ScreenState screenState;
 	glm::ivec2 textPosition;
 	glm::ivec2 indicatorPosition;
@@ -35,9 +37,12 @@ public:
 	Mode getActionState() const;
 	Mode getPreviousActionState() const;
 	ScreenState getScreenState() const;
+	InputManager* getInputManager();
 	glm::ivec2 getTextPosition() const;
 	glm::ivec2 getIndicatorPosition() const;
 	std::string getText() const;
+
+	// modes
 	bool isNone() const;
 	bool isPainting() const;
 	bool isEraseing() const;

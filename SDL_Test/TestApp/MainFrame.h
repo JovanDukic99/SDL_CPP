@@ -1,6 +1,7 @@
 #pragma once
 #include "InputManager.h"
 #include "MainPanel.h"
+#include "TextArea.h"
 #include "ColorPicker.h"
 #include "Font.h"
 #include "Controller.h"
@@ -23,7 +24,8 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	GameState gameState;
-	InputManager inputManager;
+	InputManager* inputManager;
+	TextArea* textArea;
 	ColorPicker colorPicker;
 	Controller* controller;
 	Font font;
@@ -32,16 +34,6 @@ private:
 	Timer timer;
 	glm::ivec2 start;
 	glm::ivec2 end;
-	bool writing;
-	bool show;
-	bool append;
-	bool backspacePressed;
-	bool leftPressed;
-	bool rightPressed;
-	int appendIndex;
-	Uint32 cooldown;
-	Uint32 buttonTimer;
-	SDL_Texture* screenShot;
 public:
 	MainFrame();
 	~MainFrame();
@@ -62,15 +54,11 @@ private:
 	void drawHUD();
 	void updateCursor();
 	void drawCircle(int x, int y, int radius);
-	void drawIndicator();
-	void showIndicator();
-	void hideIndicator();
-	void drawText();
 	void updateScreen();
 	void refresh();
 	void freeze();
-	void takeScreenShot();
-	void drawScreenShot();
+	void resetTextArea();
+	void reset();
 	bool doRefresh();
 };
 

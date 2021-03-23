@@ -42,3 +42,7 @@ void Font::obtainTextData(std::string text, Color color, SDL_Renderer* renderer,
 void Font::setFont(TTF_Font*& font) {
 	this->font = font;
 }
+
+TTF_Font* Font::getFont() const {
+	return font;
+}

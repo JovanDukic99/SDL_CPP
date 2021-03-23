@@ -30,6 +30,10 @@ ScreenState Controller::getScreenState() const {
     return screenState;
 }
 
+InputManager* Controller::getInputManager() {
+    return &inputManager;
+}
+
 glm::ivec2 Controller::getTextPosition() const {
     return textPosition;
 }

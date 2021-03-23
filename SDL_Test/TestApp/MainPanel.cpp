@@ -144,24 +144,25 @@ void MainPanel::initButtons() {
 void MainPanel::initController() {
 	if (controller == nullptr) {
 		controller = Controller::getInstance();
+		inputManager = controller->getInputManager();
 	}
 }
 
 // update functions
-bool MainPanel::update(InputManager inputManager) {
-	return updateColorButtons(inputManager) || updateBrushButtons(inputManager) || updateUtilityButtons(inputManager);
+bool MainPanel::update() {
+	return updateColorButtons() || updateBrushButtons() || updateUtilityButtons();
 }
 
-bool MainPanel::openColorPicker(InputManager inputManager) {
-	if (Utils::isPointInsideBounds(inputManager.getMouseCoordinates(), colorButtons[colorButtons.size() - 1].getBounds()) && inputManager.isDoubleClick()) {
+bool MainPanel::openColorPicker() {
+	if (Utils::isPointInsideBounds(inputManager->getMouseCoordinates(), colorButtons[colorButtons.size() - 1].getBounds()) && inputManager->isDoubleClick()) {
 		return true;
 	}
 	return false;
 }
 
-bool MainPanel::updateColorButtons(InputManager inputManager) {
+bool MainPanel::updateColorButtons() {
 	for (size_t i = 0; i < colorButtons.size(); i++) {
-		if (Utils::isPointInsideBounds(inputManager.getMouseCoordinates(), colorButtons[i].getBounds())) {
+		if (Utils::isPointInsideBounds(inputManager->getMouseCoordinates(), colorButtons[i].getBounds())) {
 			selectedColor = colorButtons[i].getColor();
 			colorButtons[colorButtons.size() - 1].setColor(selectedColor);
 			return true;
@@ -170,9 +171,9 @@ bool MainPanel::updateColorButtons(InputManager inputManager) {
 	return false;
 }
 
-bool MainPanel::updateBrushButtons(InputManager inputManager) {
+bool MainPanel::updateBrushButtons() {
 	for (size_t i = 0; i < brushButtons.size(); i++) {
-		if (Utils::isPointInsideBounds(inputManager.getMouseCoordinates(), brushButtons[i].getBounds())) {
+		if (Utils::isPointInsideBounds(inputManager->getMouseCoordinates(), brushButtons[i].getBounds())) {
 			if (brushButtons[i].getID() == 0) {
 				brushSize = glm::clamp(brushSize + BRUSH_INCREMENT, 1, 20);
 			}
@@ -185,9 +186,9 @@ bool MainPanel::updateBrushButtons(InputManager inputManager) {
 	return false;
 }
 
-bool MainPanel::updateUtilityButtons(InputManager inputManager) {
+bool MainPanel::updateUtilityButtons() {
 	for (size_t i = 0; i < utilityButtons.size(); i++) {
-		if (Utils::isPointInsideBounds(inputManager.getMouseCoordinates(), utilityButtons[i].getBounds())) {
+		if (Utils::isPointInsideBounds(inputManager->getMouseCoordinates(), utilityButtons[i].getBounds())) {
 			Utils::setActionState(utilityButtons[i].getID());
 			return true;
 		}

@@ -32,6 +32,7 @@ private:
 	std::string blueLabel;
 
 	Color color;
+	InputManager* inputManager;
 
 	bool clickedRed;
 	bool clickedGreen;
@@ -48,7 +49,7 @@ public:
 	void init(Color color);
 
 	// update
-	void update(InputManager inputManager);
+	void update();
 
 	// setters
 	void setFont(Font font);

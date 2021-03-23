@@ -40,6 +40,10 @@ void ColorPicker::initWindow() {
 		std::cout << "Color picker renderer failed to be created." << std::endl;
 		return;
 	}
+
+	if (inputManager == nullptr) {
+		inputManager = Controller::getInstance()->getInputManager();
+	}
 }
 
 void ColorPicker::initComponents(Color color) {
@@ -96,17 +100,17 @@ void ColorPicker::initComponents(Color color) {
 }
 
 // update
-void ColorPicker::update(InputManager inputManager) {
-	if (inputManager.getWindowID() != SDL_GetWindowID(window)) {
+void ColorPicker::update() {
+	if (inputManager->getWindowID() != SDL_GetWindowID(window)) {
 		return;
 	}
 
-	if (!inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
+	if (!inputManager->isKeyPressed(SDL_BUTTON_LEFT)) {
 		reset();
 		return;
 	}
 
-	glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
+	glm::ivec2 mouseCoords = inputManager->getMouseCoordinates();
 
 	// check if user is scrolling left or right
 	if (clickedRed == true) {

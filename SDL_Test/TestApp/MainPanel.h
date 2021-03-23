@@ -20,6 +20,7 @@ private:
 	Color selectedColor;
 	SDL_Renderer* renderer;
 	Controller* controller;
+	InputManager* inputManager;
 	Font font;
 public:
 	// constructors
@@ -29,8 +30,8 @@ public:
 	void init();
 
 	// update
-	bool update(InputManager inputManager);
-	bool openColorPicker(InputManager inputManager);
+	bool update();
+	bool openColorPicker();
 
 	// getters
 	std::vector<Component> getPanels() const;
@@ -52,7 +53,7 @@ private:
 	void initController();
 
 	// update
-	bool updateColorButtons(InputManager inputManager);
-	bool updateBrushButtons(InputManager inputManager);
-	bool updateUtilityButtons(InputManager inputManager);
+	bool updateColorButtons();
+	bool updateBrushButtons();
+	bool updateUtilityButtons();
 };

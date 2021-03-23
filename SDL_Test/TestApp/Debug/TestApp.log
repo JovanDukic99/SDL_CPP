@@ -1,5 +1,5 @@
-﻿  MainFrame.cpp
-D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\MainFrame.cpp(283,25): warning C4018: '<': signed/unsigned mismatch
-D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\MainFrame.cpp(307,26): warning C4018: '<': signed/unsigned mismatch
-D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\MainFrame.cpp(490,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+﻿  TextArea.cpp
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\TextArea.cpp(97,25): warning C4018: '<=': signed/unsigned mismatch
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\TextArea.cpp(155,21): warning C4018: '<': signed/unsigned mismatch
+D:\Users\Jovan\C++\SDL_Testing\SDL_Test\TestApp\TextArea.cpp(170,24): warning C4018: '<=': signed/unsigned mismatch
   TestApp.vcxproj -> D:\Users\Jovan\C++\SDL_Testing\SDL_Test\Debug\TestApp.exe

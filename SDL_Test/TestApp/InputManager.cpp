@@ -17,12 +17,30 @@ void InputManager::setMoving(bool moving) {
 	this->moving = moving;
 }
 
+void InputManager::setAppend(bool append) {
+	this->append = append;
+}
+
 void InputManager::setClickNumber(int clickNumber) {
 	this->clickNumber = clickNumber;
 }
 
 void InputManager::setWindowID(unsigned int windowID) {
 	this->windowID = windowID;
+}
+
+void InputManager::setTextInput(char* newText, bool append) {
+	setAppend(append);
+	setText(newText);
+}
+
+void InputManager::setText(char* newText) {
+	if (newText == nullptr) {
+		text.clear();
+	}
+	else {
+		text.append(newText);
+	}
 }
 
 // getters
@@ -48,6 +66,14 @@ unsigned int InputManager::getWindowID() const {
 	return windowID;
 }
 
+std::string InputManager::getText() const {
+	return text;
+}
+
 bool InputManager::isMoving() const {
 	return moving;
+}
+
+bool InputManager::isAppend() const {
+	return append;
 }

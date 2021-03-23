@@ -9,7 +9,7 @@
 #define MILISECONDS 1000
 #define DESIRED_FRAME_TIME (MILISECONDS / DESIRED_FPS)
 
-MainFrame::MainFrame() : gameState(GameState::PLAY), writing(false), cooldown(0), buttonTimer(0), show(true), backspacePressed(false), appendIndex(0) {
+MainFrame::MainFrame() : gameState(GameState::PLAY) {
 	init();
 }
 
@@ -78,6 +78,7 @@ void MainFrame::initSDL_Image() {
 
 void MainFrame::initController() {
 	controller = Controller::getInstance();
+	inputManager = controller->getInputManager();
 }
 
 void MainFrame::initComponents() {
@@ -104,16 +105,14 @@ void MainFrame::run() {
 		handleInputEvents();
 		update();
 		updateScreen();
+		reset();
 
 		Uint32 endTime = SDL_GetTicks();
 		Uint32 frameTime = endTime - startTime;
 
-		timer.setFrameTime(frameTime);
-
 		if (DESIRED_FRAME_TIME > frameTime) {
 			SDL_Delay(DESIRED_FRAME_TIME - frameTime);
-			cooldown += DESIRED_FRAME_TIME - frameTime;
-			start = inputManager.getMouseCoordinates();
+			start = inputManager->getMouseCoordinates();
 		}
 	}
 }
@@ -133,35 +132,32 @@ void MainFrame::handleInputEvents() {
 			break;
 		}
 		case SDL_MOUSEMOTION: {
-			inputManager.setMoving(true);
-			inputManager.setMouseCoordinates(event.motion.x, event.motion.y);
-			inputManager.setWindowID(event.window.windowID);
+			inputManager->setMoving(true);
+			inputManager->setMouseCoordinates(event.motion.x, event.motion.y);
+			inputManager->setWindowID(event.window.windowID);
 			break;
 		}
 		case SDL_TEXTINPUT: {
-			if (writing) {
-				append = true;
-				controller->appendText(event.text.text, appendIndex);
-				break;
-			}
+			inputManager->setTextInput(event.text.text, true);
+			break;
 		}
 		case SDL_KEYDOWN: {
-			inputManager.pressKey(event.key.keysym.sym);
+			inputManager->pressKey(event.key.keysym.sym);
 			break;
 		}
 		case SDL_KEYUP: {
-			inputManager.releaseKey(event.key.keysym.sym);
+			inputManager->releaseKey(event.key.keysym.sym);
 			break;
 		}
 		case SDL_MOUSEBUTTONDOWN: {
-			inputManager.pressKey(event.button.button);
-			inputManager.setClickNumber(event.button.clicks);
-			inputManager.setWindowID(event.window.windowID);
+			inputManager->pressKey(event.button.button);
+			inputManager->setClickNumber(event.button.clicks);
+			inputManager->setWindowID(event.window.windowID);
 			break;
 		}
 		case SDL_MOUSEBUTTONUP: {
-			inputManager.releaseKey(event.button.button);
-			inputManager.setWindowID(event.window.windowID);
+			inputManager->releaseKey(event.button.button);
+			inputManager->setWindowID(event.window.windowID);
 			break;
 		}
 		default:
@@ -187,20 +183,20 @@ void MainFrame::handleWindowEvents(SDL_Event& event) {
 }
 
 void MainFrame::update() {
-	glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
+	glm::ivec2 mouseCoords = inputManager->getMouseCoordinates();
 
-	if (inputManager.isKeyPressed(SDLK_ESCAPE)) {
+	if (inputManager->isKeyPressed(SDLK_ESCAPE)) {
 		gameState = GameState::EXIT;
 		return;	
 	}
 
 	// update start position
-	if (!inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
+	if (!inputManager->isKeyPressed(SDL_BUTTON_LEFT)) {
 		start = mouseCoords;
 	}
 
 		// should open colorPicker
-		if (!colorPicker.isVisible() && mainPanel.openColorPicker(inputManager)) {
+		if (!colorPicker.isVisible() && mainPanel.openColorPicker()) {
 			colorPicker.init(mainPanel.getSelectedColor());
 			controller->setMode(Mode::NONE);
 			updateCursor();
@@ -212,8 +208,18 @@ void MainFrame::update() {
 			return;
 		}
 
+		// end writing
+		if (textArea != nullptr && controller->isWriting() && mouseCoords.y < MAIN_PANEL_HEIGHT) {
+			controller->updatePreviousMode();
+			controller->setMode(Mode::NONE);
+			refresh();
+			updateCursor();
+			resetTextArea();
+			return;
+		}
+
 		// save previous state and switch to hand cursor
-		if (!controller->isNone() && mouseCoords.y < MAIN_PANEL_HEIGHT) {
+		if (!controller->isNone() && mouseCoords.y < MAIN_PANEL_HEIGHT ) {
 			controller->updatePreviousMode();
 			controller->setMode(Mode::NONE);
 			refresh();
@@ -222,14 +228,12 @@ void MainFrame::update() {
 		}
 
 		// check if update happend in mainPanel
-		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
-			if (mouseCoords.y < MAIN_PANEL_HEIGHT) {
-				if (mainPanel.update(inputManager)) {
-					refresh();
-					drawHUD();
-					inputManager.releaseKey(SDL_BUTTON_LEFT);
-					return;
-				}
+		if (controller->isNone() && inputManager->isKeyPressed(SDL_BUTTON_LEFT)) {
+			if (mainPanel.update()) {
+				refresh();
+				drawHUD();
+				inputManager->releaseKey(SDL_BUTTON_LEFT);
+				return;
 			}
 		}
 
@@ -241,96 +245,35 @@ void MainFrame::update() {
 			return;
 		}
 
-		// writing
-		if (!writing && inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isWriting()) {
-			takeScreenShot();
-			writing = true;
-			controller->resetText();
-			appendIndex = 0;
-			controller->setTextPosition(mouseCoords);
-			controller->setIndicatorPosition(mouseCoords);
-			cooldown = 0;
-			show = true;
-			inputManager.releaseKey(SDL_BUTTON_LEFT);
+		// wiritng
+		if (controller->isWriting() && inputManager->isKeyPressed(SDL_BUTTON_LEFT) && textArea == nullptr) {
+			textArea = new TextArea(mouseCoords, BLACK, font, renderer);
+			inputManager->releaseKey(SDL_BUTTON_LEFT);
+			return;
 		}
-		else if (writing && inputManager.isKeyPressed(SDL_BUTTON_LEFT)) {
-			hideIndicator();
-			writing = false;
-			
+		else if (controller->isWriting() && inputManager->isKeyPressed(SDL_BUTTON_LEFT) && textArea != nullptr) {
+			refresh();
+			resetTextArea();
+			inputManager->releaseKey(SDL_BUTTON_LEFT);
+			return;
 		}
-		else if (!controller->isWriting()) {
-			writing = false;
-			hideIndicator();
+		else if (controller->isWriting() && textArea != nullptr) {
+			textArea->update(DESIRED_FRAME_TIME);
+			textArea->draw();
+			refresh();
+			return;
 		}
-
-		// hide and seek
-		if (writing) {
-			if (!backspacePressed && inputManager.isKeyPressed(SDLK_BACKSPACE) && controller->removeCharacter()) {
-				buttonTimer = 0;
-				backspacePressed = true;
-				append = true;
-			}
-			else if (!leftPressed && inputManager.isKeyPressed(SDLK_LEFT)) {
-				leftPressed = true;
-				buttonTimer = 0;
-				if (appendIndex - 1 > 0) {
-					appendIndex--;
-				}
-			}
-			else if (!rightPressed && inputManager.isKeyPressed(SDLK_RIGHT)) {
-				rightPressed = true;
-				buttonTimer = 0;
-				if (appendIndex + 1 < controller->getText().size()) {
-					appendIndex++;
-				}
-			}
-			else if (backspacePressed && inputManager.isKeyPressed(SDLK_BACKSPACE)) {
-				if (buttonTimer > 15 && controller->removeCharacter()) {
-					append = true;
-				}
-				else {
-					buttonTimer += timer.getFrameTime();
-				}
-			}
-			else if (leftPressed && inputManager.isKeyPressed(SDLK_LEFT)) {
-				if (buttonTimer > 15) {
-					if (appendIndex - 1 > 0) {
-						appendIndex--;
-					}
-				}
-				else {
-					buttonTimer += timer.getFrameTime();
-				}
-			}
-			else if(rightPressed && inputManager.isKeyPressed(SDLK_RIGHT)) {
-				if (buttonTimer > 15) {
-					if (appendIndex + 1 < controller->getText().size()) {
-						appendIndex++;
-					}
-				}
-				else {
-					buttonTimer += timer.getFrameTime();
-				}	
-			}
-			else if (!inputManager.isKeyPressed(SDLK_BACKSPACE)) {
-				backspacePressed = false;
-			}
-			else if (!inputManager.isKeyPressed(SDLK_LEFT)) {
-				leftPressed = false;
-			}
-			else if (!inputManager.isKeyPressed(SDLK_RIGHT)) {
-				rightPressed = false;
-			}
-			drawText();
-			drawIndicator();
+		else if (!controller->isWriting() && textArea != nullptr) {
+			refresh();
+			resetTextArea();
 			return;
 		}
 
 		// erasing
-		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isEraseing() && inputManager.isMoving()) {
+		if (inputManager->isKeyPressed(SDL_BUTTON_LEFT) && controller->isEraseing() && inputManager->isMoving()) {
 			refresh();
 
-			glm::ivec2 mouseCoords = inputManager.getMouseCoordinates();
+			glm::ivec2 mouseCoords = inputManager->getMouseCoordinates();
 
 			rubber.x = mouseCoords.x - RUBBER_CURSOR_HOT_X;
 			rubber.y = mouseCoords.y - RUBBER_CURSOR_HOT_Y;
@@ -352,15 +295,15 @@ void MainFrame::update() {
 		}
 		
 		// bucket painting
-		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isBucketPainting()) {
+		if (inputManager->isKeyPressed(SDL_BUTTON_LEFT) && controller->isBucketPainting()) {
 			Utils::paintWithBucket(mouseCoords, mainPanel.getSelectedColor(), renderer);
 			refresh();
-			inputManager.releaseKey(SDL_BUTTON_LEFT);
+			inputManager->releaseKey(SDL_BUTTON_LEFT);
 			return;
 		}
 
 		// painting
-		if (inputManager.isKeyPressed(SDL_BUTTON_LEFT) && controller->isPainting() && inputManager.isMoving()) {
+		if (inputManager->isKeyPressed(SDL_BUTTON_LEFT) && controller->isPainting() && inputManager->isMoving()) {
 			refresh();
 
 			if (mouseCoords.y > MAIN_PANEL_HEIGHT) {
@@ -385,19 +328,17 @@ void MainFrame::update() {
 						SDL_RenderFillRect(renderer, &bounds);
 					}
 
-					inputManager.setMoving(false);
+					inputManager->setMoving(false);
 
 					start = end;
 				}
 			}
 		}
-
-	inputManager.setClickNumber(0);
 }
 
 bool MainFrame::updateColorPicker() {
 	if (colorPicker.isVisible()) {
-		colorPicker.update(inputManager);
+		colorPicker.update();
 		if (!colorPicker.isVisible()) {
 			mainPanel.setSelectedColor(colorPicker.getColor());
 			colorPicker.closeWindow();
@@ -549,76 +490,6 @@ void MainFrame::drawCircle(int originX, int originY, int radius) {
 	}
 }
 
-void MainFrame::drawIndicator() {
-	cooldown += timer.getFrameTime();
-
-	if (cooldown >= 800) {
-		if (show) {
-			showIndicator();
-		}
-		else {
-			hideIndicator();
-		}
-		cooldown = 0;
-	}
-}
-
-void MainFrame::showIndicator() {
-	glm::ivec2 position = controller->getIndicatorPosition();
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderDrawLine(renderer, position.x, position.y - 10, position.x, position.y + 10);
-	refresh();
-	show = false;
-}
-
-void MainFrame::hideIndicator() {
-	glm::ivec2 position = controller->getIndicatorPosition();
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_RenderDrawLine(renderer, position.x, position.y - 10, position.x, position.y + 10);
-	refresh();
-	show = true;
-}
-
-void MainFrame::drawText() {
-	if (append) {
-		drawScreenShot();
-		controller->setIndicatorPosition(controller->getTextPosition());
-
-		glm::ivec2 position = controller->getTextPosition();
-		std::string text = controller->getText();
-
-		if(text.empty()){
-			append = false;
-			appendIndex = 0;
-			refresh();
-			return;
-		}
-
-		SDL_Texture* fontTexture = nullptr;
-		SDL_Rect textBounds;
-
-		font.obtainTextData(text, mainPanel.getSelectedColor(), renderer, &fontTexture, &textBounds, position);
-
-		textBounds.y = textBounds.y - textBounds.h / 2;
-
-		SDL_RenderCopy(renderer, fontTexture, NULL, &textBounds);
-		SDL_DestroyTexture(fontTexture);
-		refresh();
-
-		glm::ivec2 pos = controller->getIndicatorPosition();
-		controller->setIndicatorPosition(glm::ivec2(pos.x + textBounds.w, pos.y));
-
-		append = false;
-
-		if (leftPressed || rightPressed) {
-			appendIndex++;
-		}
-		else {
-			appendIndex = text.size();
-		}
-	}
-}
-
 void MainFrame::updateScreen() {
 	if (doRefresh()) {
 		SDL_RenderPresent(renderer);
@@ -638,21 +509,12 @@ void MainFrame::freeze() {
 	controller->setScreenState(ScreenState::FREEZE);
 }
 
-void MainFrame::takeScreenShot() {
-	SDL_Surface* sshot = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-
-	SDL_Rect rect = {0, MAIN_PANEL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT};
-
-	SDL_RenderReadPixels(renderer, &rect, SDL_PIXELFORMAT_ARGB8888, sshot->pixels, sshot->pitch);
-
-	if ((screenShot = SDL_CreateTextureFromSurface(renderer, sshot)) == nullptr) {
-		std::cout << "Screenshot creation failed." << std::endl;
-	}
-
-	SDL_FreeSurface(sshot);
+void MainFrame::resetTextArea() {
+	delete textArea;
+	textArea = nullptr;
 }
 
-void MainFrame::drawScreenShot() {
-	SDL_Rect dest = { 0, MAIN_PANEL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT };
-	SDL_RenderCopy(renderer, screenShot, NULL, &dest);
+void MainFrame::reset() {
+	inputManager->setClickNumber(0);
+	inputManager->setTextInput(nullptr, false);
 }
