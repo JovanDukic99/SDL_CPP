@@ -14,16 +14,19 @@ private:
 		NONE,
 		LEFT,
 		RIGHT,
+		UP,
+		DOWN,
 		BACKSPACE,
 		ENTER
 	};
 private:
 	glm::ivec2 indicatorPosition;
 	std::vector<glm::ivec2> textPositions;
+	std::vector<glm::ivec2> dimensions;
 	std::vector<std::string> textLines;
+	int maxIndex;
 	int index;
 	int indicatorIndex;
-	bool repaint;
 	bool show;
 	Uint32 buttonTimer;
 	Uint32 indicatorTimer;
@@ -38,10 +41,9 @@ public:
 
 	void draw();
 	void update(Uint32 deltaTime);
-
-	void setRepaint(bool repaint);
 private:
 	void drawText();
+	void drawTextBounds();
 	void drawIndicator();
 	void showIndicator();
 	void hideIndicator();
@@ -56,6 +58,8 @@ private:
 	bool isRight() const;
 	bool isBackspace() const;
 	bool isEnter() const;
+	bool isUp() const;
+	bool isDown() const;
 	bool removeCharacter();
 
 	void setIndicatorState(IndicatorState indicatorState);
@@ -64,7 +68,11 @@ private:
 	bool decreaseIndicatorPos();
 	void leftAction(Uint32 deltaTime);
 	void rightAction(Uint32 deltaTime);
+	void rightDown();
+	void upAction();
+	void downAction();
 	void backspaceAction(Uint32 deltaTime);
+	void enterAction();
 	void moveIndicatorLeft();
 	void moveIndicatorRight();
 };

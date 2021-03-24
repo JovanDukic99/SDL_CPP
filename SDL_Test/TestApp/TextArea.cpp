@@ -2,10 +2,11 @@
 #include "Config.h"
 #include <iostream>
 
-TextArea::TextArea(glm::ivec2 position, Color color, Font font, SDL_Renderer* renderer) : font(font), color(color), renderer(renderer), indicatorPosition(position), indicatorState(IndicatorState::NONE), indicatorTimer(0), indicatorIndex(0), show(true), index(0) {
+TextArea::TextArea(glm::ivec2 position, Color color, Font font, SDL_Renderer* renderer) : font(font), color(color), renderer(renderer), indicatorPosition(position), indicatorState(IndicatorState::NONE), indicatorTimer(0), indicatorIndex(0), show(true), index(0), maxIndex(0) {
 	setPosition(position);
 	takeScreenshot();
 	textPositions.emplace_back(position);
+	dimensions.emplace_back(glm::ivec2(0, 0));
 	textLines.emplace_back("");
 }
 
@@ -68,18 +69,41 @@ bool TextArea::isEnter() const {
 	return indicatorState == IndicatorState::ENTER;
 }
 
+bool TextArea::isUp() const {
+	return indicatorState == IndicatorState::UP;
+}
+
+bool TextArea::isDown() const {
+	return indicatorState == IndicatorState::DOWN;
+}
+
 bool TextArea::removeCharacter() {
 	if (indicatorIndex > 0) {
 		decreaseIndicatorPos();
 		moveIndicatorLeft();
-		textLines[index].erase(textLines[index].begin() + indicatorIndex);
+		textLines[index].erase(textLines[index].begin() + indicatorIndex); // 0 1 2 3
+		return true;
+	}else if (index > 0 && index < textPositions.size()) {
+		int verticalOffset = TTF_FontHeight(font.getFont());
+		for (size_t i = index + 1; i < textPositions.size(); i++) {
+			textPositions[i].y = textPositions[i].y - verticalOffset;
+		}
+
+		textLines.erase(textLines.begin() + index);
+		dimensions.erase(dimensions.begin() + index);
+		textPositions.erase(textPositions.begin() + index);
+
+		if (index - 1 >= 0) {
+			index--;
+			maxIndex--;
+			indicatorIndex = textLines[index].size();
+			indicatorPosition = textPositions[index];
+			indicatorPosition.x += dimensions[index].x;
+		}
+
 		return true;
 	}
-	else if(index - 1 >= 0 ) {
-		index--;
-		indicatorIndex = textLines[index].size();
-		indicatorPosition = position;
-	}
+
 	return false;
 }
 
@@ -130,6 +154,38 @@ void TextArea::rightAction(Uint32 deltaTime) {
 	}
 }
 
+void TextArea::rightDown() {
+	hideIndicator();
+
+	if (index + 1 <= maxIndex) {
+		index++;
+		indicatorIndex = 0;
+		indicatorPosition = textPositions[index];
+	}
+}
+
+void TextArea::upAction() {
+	hideIndicator();
+
+	if (index - 1 >= 0) {
+		index--;
+		indicatorIndex = textLines[index].size();
+		indicatorPosition = textPositions[index];
+		indicatorPosition.x += dimensions[index].x;
+	}
+}
+
+void TextArea::downAction() {
+	hideIndicator();
+
+	if (index + 1 <= maxIndex) {
+		index++;
+		indicatorIndex = textLines[index].size();
+		indicatorPosition = textPositions[index];
+		indicatorPosition.x += dimensions[index].x;
+	}
+
+}
 
 void TextArea::backspaceAction(Uint32 deltaTime) {
 	if (buttonTimer > 1000 && removeCharacter()) {
@@ -140,14 +196,38 @@ void TextArea::backspaceAction(Uint32 deltaTime) {
 	}
 }
 
+void TextArea::enterAction() {
+	hideIndicator();
+
+	index++;
+	indicatorPosition = glm::ivec2(position.x, indicatorPosition.y + TTF_FontHeight(font.getFont())); // 0 1 2 3
+	indicatorIndex = 0;
+
+	if (index < textPositions.size()) {
+		int verticalOffset = TTF_FontHeight(font.getFont());
+		for (size_t i = index; i <= maxIndex; i++) {
+			textPositions[i].y = textPositions[i].y + verticalOffset;
+		}
+	}
+
+	textPositions.insert(textPositions.begin() + index, indicatorPosition);
+	dimensions.insert(dimensions.begin() + index, glm::ivec2(0, 0));
+	textLines.insert(textLines.begin() + index, "");
+
+	maxIndex++;
+
+	inputManager->setAppend(true);
+	setIndicatorState(IndicatorState::ENTER);
+}
+
 void TextArea::moveIndicatorLeft() {
-	if (indicatorIndex > 0) {
+	if (indicatorIndex >= 0) {
 		int minx, maxx, miny, maxy, advance;
 		TTF_GlyphMetrics(font.getFont(), textLines[index].at(indicatorIndex), &minx, &maxx, &miny, &maxy, &advance);
 		indicatorPosition.x = indicatorPosition.x - advance;
 	}
 	else {
-		indicatorPosition = textPositions[index];
+		indicatorPosition.x = textPositions[index].x;
 	}
 }
 
@@ -159,19 +239,18 @@ void TextArea::moveIndicatorRight() {
 	}
 }
 
-void TextArea::setRepaint(bool repaint) {
-	this->repaint = repaint;
-}
-
 void TextArea::drawText() {
 	if (inputManager->isAppend()) {
 		drawScreenshot();
 
-		for (size_t i = 0; i <= index; i++) {
+		dimension = glm::ivec2(0, 0);
+
+		for (size_t i = 0; i <= maxIndex; i++) {
 			std::string currentLine = textLines[i];
 			glm::ivec2 currentPosition = textPositions[i];
 
 			if (currentLine.empty()) {
+				dimension.y += TTF_FontHeight(font.getFont());
 				continue;
 			}
 
@@ -179,14 +258,30 @@ void TextArea::drawText() {
 			SDL_Rect textBounds;
 
 			font.obtainTextData(currentLine, color, renderer, &fontTexture, &textBounds, currentPosition);
-			setDimension(glm::ivec2(textBounds.w, textBounds.h));
+			dimensions[i] = glm::ivec2(textBounds.w, textBounds.h);
+
+			if (textBounds.w > dimension.x) {
+				dimension.x = textBounds.w;
+			}
+
+			dimension.y += textBounds.h;
 
 			textBounds.y = textBounds.y - textBounds.h / 2;
 
 			SDL_RenderCopy(renderer, fontTexture, NULL, &textBounds);
 			SDL_DestroyTexture(fontTexture);
 		}
+
+		if (dimension.x > 0) {
+			drawTextBounds();
+		}
 	}
+}
+
+void TextArea::drawTextBounds() {
+	SDL_Rect textBounds = { position.x - 5, position.y - 20, dimension.x + 10, dimension.y + 5 }; // dimension.y + 5 bcs. of q and g
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	SDL_RenderDrawRect(renderer, &textBounds);
 }
 
 void TextArea::drawIndicator() {
@@ -220,16 +315,36 @@ void TextArea::update(Uint32 deltaTime) {
 	if (!isBackspace() && inputManager->isKeyPressed(SDLK_BACKSPACE) && removeCharacter()) {
 		changeState(IndicatorState::BACKSPACE);
 	}
-	else if (!isLeft() && inputManager->isKeyPressed(SDLK_LEFT) && decreaseIndicatorPos()) {
-		hideIndicator();
-		moveIndicatorLeft();
+	else if (!isLeft() && inputManager->isKeyPressed(SDLK_LEFT)) {
+		if (decreaseIndicatorPos()) {
+			hideIndicator();
+			moveIndicatorLeft();
+		}
+		else {
+			upAction();
+		}
 		changeState(IndicatorState::LEFT);
 	}
 	else if (!isRight() && inputManager->isKeyPressed(SDLK_RIGHT)) {
 		hideIndicator();
 		moveIndicatorRight();
-		increaseIndicatorPos();
+
+		if (!increaseIndicatorPos()) {
+			rightDown();
+		}
+
 		changeState(IndicatorState::RIGHT);
+	}
+	else if (!isUp() && inputManager->isKeyPressed(SDLK_UP)) {
+		upAction();
+		changeState(IndicatorState::UP);
+	}
+	else if (!isDown() && inputManager->isKeyPressed(SDLK_DOWN)) {	
+		downAction();
+		changeState(IndicatorState::DOWN);
+	}
+	else if (!isEnter() && (inputManager->isKeyPressed(SDLK_RETURN) || inputManager->isKeyPressed(SDLK_KP_ENTER))) {
+		enterAction();
 	}
 	else if (isBackspace() && inputManager->isKeyPressed(SDLK_BACKSPACE)) {
 		backspaceAction(deltaTime);
@@ -249,20 +364,14 @@ void TextArea::update(Uint32 deltaTime) {
 	else if (!inputManager->isKeyPressed(SDLK_BACKSPACE) && isBackspace()) {
 		setIndicatorState(IndicatorState::NONE);
 	}
-	else if (!inputManager->isKeyPressed(SDLK_RETURN) && isEnter()) {
+	else if ((!inputManager->isKeyPressed(SDLK_RETURN) && !inputManager->isKeyPressed(SDLK_KP_ENTER)) && isEnter()) {
 		setIndicatorState(IndicatorState::NONE);
 	}
-	else if (!isEnter() && inputManager->isKeyPressed(SDLK_RETURN)) {
-		hideIndicator();
-
-		index++;
-		indicatorPosition = glm::ivec2(position.x, indicatorPosition.y + TTF_FontHeight(font.getFont()));
-		indicatorIndex = 0;
-
-		textPositions.emplace_back(indicatorPosition);
-		textLines.emplace_back("");
-
-		setIndicatorState(IndicatorState::ENTER);
+	else if (!inputManager->isKeyPressed(SDLK_UP) && isUp()) {
+		setIndicatorState(IndicatorState::NONE);
+	}
+	else if (!inputManager->isKeyPressed(SDLK_DOWN) && isDown()) {
+		setIndicatorState(IndicatorState::NONE);
 	}
 }
 
