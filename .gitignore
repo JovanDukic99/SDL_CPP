@@ -12,3 +12,8 @@ SDL_Test/.vs/SDL_Test/v16/.suo
 *.ilk
 *.pdb
 *.idb
+*.obj
+*.obj
+*.obj
+*.obj
+*.idb
