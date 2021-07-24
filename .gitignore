@@ -42,3 +42,7 @@ SDL_Test/TestApp/Debug/Timer.obj
 SDL_Test/TestApp/Debug/Utils.obj
 SDL_Test/TestApp/Debug/vc142.idb
 SDL_Test/TestApp/Debug/vc142.pdb
+*.exe
+*.exe
+*.obj
+*.tlog
