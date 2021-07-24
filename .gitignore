@@ -46,3 +46,6 @@ SDL_Test/TestApp/Debug/vc142.pdb
 *.exe
 *.obj
 *.tlog
+*.pdb
+*.obj
+*.idb
