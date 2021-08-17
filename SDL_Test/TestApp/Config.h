@@ -48,6 +48,27 @@ static const int MAIN_PANEL_HEIGHT = 2 * UNIT_HEIGHT;
 static const int MAIN_PANEL_START_X = 0;
 static const int MAIN_PANEL_START_Y = 0;
 
+// chat panel config
+static const int CHAT_PANEL_WIDTH = 300;
+static const int CHAT_PANEL_HEIGHT = SCREEN_HEIGHT - MAIN_PANEL_HEIGHT;
+
+static const int CHAT_PANEL_START_X = SCREEN_WIDTH - CHAT_PANEL_WIDTH;
+static const int CHAT_PANEL_START_Y = MAIN_PANEL_HEIGHT;
+
+// text panel config
+static const int TEXT_PANEL_WIDTH = 250;
+static const int TEXT_PANEL_HEIGHT = 400;
+
+static const int TEXT_PANEL_START_X = ((SCREEN_WIDTH + (SCREEN_WIDTH - CHAT_PANEL_WIDTH)) - TEXT_PANEL_WIDTH) / 2;
+static const int TEXT_PANEL_START_Y = CHAT_PANEL_START_Y + 25;
+
+// input panel config
+static const int INPUT_PANEL_WIDTH = 250;
+static const int INPUT_PANEL_HEIGHT = 150;
+
+static const int INPUT_PANEL_START_X = ((SCREEN_WIDTH + (SCREEN_WIDTH - CHAT_PANEL_WIDTH)) - INPUT_PANEL_WIDTH) / 2;
+static const int INPUT_PANEL_START_Y = (SCREEN_HEIGHT + (TEXT_PANEL_START_Y + TEXT_PANEL_HEIGHT) - INPUT_PANEL_HEIGHT) / 2;
+
 // color button config
 static const int COLOR_BUTTON_NUMBER = 21;
 

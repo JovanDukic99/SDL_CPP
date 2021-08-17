@@ -6,6 +6,7 @@
 #include "Font.h"
 #include "Controller.h"
 #include "Timer.h"
+#include "ChatPanel.h"
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
 #include <SDL_IMAGE/SDL_image.h>
@@ -31,6 +32,7 @@ private:
 	Font font;
 	SDL_Rect rubber;
 	MainPanel mainPanel;
+	ChatPanel chatPanel;
 	Timer timer;
 	glm::ivec2 start;
 	glm::ivec2 end;
@@ -52,6 +54,7 @@ private:
 	bool updateColorPicker();
 	void initDraw();
 	void drawHUD();
+	void drawChatPanel();
 	void updateCursor();
 	void drawCircle(int x, int y, int radius);
 	void updateScreen();

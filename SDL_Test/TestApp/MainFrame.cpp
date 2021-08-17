@@ -91,6 +91,9 @@ void MainFrame::initComponents() {
 	mainPanel.setRenderer(renderer);
 	mainPanel.init();
 
+	// forward the renderer to chatPanel
+	chatPanel.setRenderer(renderer);
+
 	// forward font to ColorPicker
 	colorPicker.setFont(font);
 }
@@ -209,7 +212,7 @@ void MainFrame::update() {
 		}
 
 		// end writing
-		if (textArea != nullptr && controller->isWriting() && mouseCoords.y < MAIN_PANEL_HEIGHT) {
+		if (textArea != nullptr && controller->isWriting() && (mouseCoords.y < MAIN_PANEL_HEIGHT || mouseCoords.x > CHAT_PANEL_START_X)) {
 			controller->updatePreviousMode();
 			controller->setMode(Mode::NONE);
 			refresh();
@@ -218,7 +221,7 @@ void MainFrame::update() {
 			return;
 		}
 
-		// save previous state and switch to hand cursor
+		// save previous state and switch to hand cursor (mainPanel)
 		if (!controller->isNone() && mouseCoords.y < MAIN_PANEL_HEIGHT ) {
 			controller->updatePreviousMode();
 			controller->setMode(Mode::NONE);
@@ -227,7 +230,21 @@ void MainFrame::update() {
 			return;
 		}
 
-		// check if update happend in mainPanel
+		// save previous state and switch to hand cursor (chatPanel)
+		if (!controller->isNone() && mouseCoords.x > CHAT_PANEL_START_X && mouseCoords.y > CHAT_PANEL_START_Y) {
+			controller->updatePreviousMode();
+			controller->setMode(Mode::NONE);
+			refresh();
+			updateCursor();
+			return;
+		}
+
+		if (controller->isNone() && mouseCoords.x > CHAT_PANEL_START_X && mouseCoords.y > CHAT_PANEL_START_Y) {
+			
+			return;
+		}
+
+		// check if update happened in mainPanel
 		if (controller->isNone() && inputManager->isKeyPressed(SDL_BUTTON_LEFT)) {
 			if (mainPanel.update()) {
 				refresh();
@@ -358,6 +375,9 @@ void MainFrame::initDraw() {
 	// draw hud
 	drawHUD();
 
+	// draw chatPanel
+	drawChatPanel();
+
 	updateScreen();
 }
 
@@ -413,6 +433,10 @@ void MainFrame::drawHUD() {
 	font.obtainTextData(brushLabel, BLACK, renderer, &texture, &labelBounds, glm::ivec2(BRUSH_LABEL_X, BRUSH_LABEL_Y));
 
 	SDL_RenderCopy(renderer, texture, NULL, &labelBounds);
+}
+
+void MainFrame::drawChatPanel() {
+	chatPanel.draw();
 }
 
 void MainFrame::updateCursor() {

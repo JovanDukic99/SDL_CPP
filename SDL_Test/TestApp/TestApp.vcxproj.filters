@@ -84,14 +84,14 @@
     <ClCompile Include="TextArea.cpp">
       <Filter>Source Files\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="TextPanel.cpp">
-      <Filter>Source Files\gui</Filter>
-    </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
     <ClCompile Include="GUIBase.cpp">
       <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="ChatPanel.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -134,14 +134,14 @@
     <ClInclude Include="TextArea.h">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="TextPanel.h">
-      <Filter>Header Files\gui</Filter>
-    </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="GUIBase.h">
       <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="ChatPanel.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

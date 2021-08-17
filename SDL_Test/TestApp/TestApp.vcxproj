@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ChatPanel.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="ColorPicker.cpp" />
     <ClCompile Include="Component.cpp" />
@@ -156,11 +157,11 @@
     <ClCompile Include="MainPanel.cpp" />
     <ClCompile Include="Pixel.cpp" />
     <ClCompile Include="TextArea.cpp" />
-    <ClCompile Include="TextPanel.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ChatPanel.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="ColorPicker.h" />
     <ClInclude Include="Component.h" />
@@ -174,7 +175,6 @@
     <ClInclude Include="MainPanel.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="TextArea.h" />
-    <ClInclude Include="TextPanel.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
