@@ -10,6 +10,12 @@ Font::Font(std::string fontPath, int size) {
 	init(fontPath, size);
 }
 
+Font::~Font() {
+	/*if (font != nullptr) {
+		TTF_CloseFont(font);
+	}*/
+}
+
 // init
 void Font::init(std::string fontPath, int size) {
 	loadFont(fontPath, size);
@@ -30,7 +36,7 @@ void Font::obtainTextData(std::string text, Color color, SDL_Renderer* renderer,
 	}
 
 	// set up text position
-	*bounds = {position.x, position.y, fontSurface->w, fontSurface->h};
+	*bounds = { position.x, position.y, fontSurface->w, fontSurface->h };
 
 	if ((*texture = SDL_CreateTextureFromSurface(renderer, fontSurface)) == nullptr) {
 		std::cout << "SDL_CreateTextureFromSurface has failed." << std::endl;

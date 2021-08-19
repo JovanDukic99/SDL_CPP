@@ -50,3 +50,8 @@ SDL_Test/TestApp/Debug/vc142.pdb
 *.obj
 *.idb
 SDL_Test/.vs/SDL_Test/v16/.suo
+*.exe
+SDL_Test/.vs/SDL_Test/v16/.suo
+*.ilk
+*.obj
+*.tlog

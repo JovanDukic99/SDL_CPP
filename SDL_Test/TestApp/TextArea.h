@@ -2,11 +2,13 @@
 #include "Font.h"
 #include "Color.h"
 #include "GUIBase.h"
+#include "ChatPanel.h"
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
 #include <SDL/SDL_render.h>
 #include <vector>
 #include <string>
+
 class TextArea : public GUIBase
 {
 private:
@@ -21,15 +23,16 @@ private:
 	};
 private:
 	glm::ivec2 indicatorPosition;
-	std::vector<glm::ivec2> textPositions;
-	std::vector<glm::ivec2> dimensions;
-	std::vector<std::string> textLines;
+	std::vector<glm::ivec2> textPositions; // posiiton of text in rows
+	std::vector<glm::ivec2> dimensions; // text dimensions
+	std::vector<std::string> textLines; // text
 	int maxIndex;
 	int index;
 	int indicatorIndex;
 	bool show;
 	Uint32 buttonTimer;
 	Uint32 indicatorTimer;
+	ChatPanel* chatPanel;
 	Color color;
 	Font font;
 	IndicatorState indicatorState;
@@ -41,6 +44,7 @@ public:
 
 	void draw();
 	void update(Uint32 deltaTime);
+	void setChatPanel(ChatPanel* chatPanel);
 private:
 	void drawText();
 	void drawTextBounds();
@@ -71,8 +75,9 @@ private:
 	void rightDown();
 	void upAction();
 	void downAction();
-	void backspaceAction(Uint32 deltaTime);
 	void enterAction();
+	void backspaceAction(Uint32 deltaTime);
+	void newLine();
 	void moveIndicatorLeft();
 	void moveIndicatorRight();
 };

@@ -13,6 +13,7 @@ public:
 	// constructors
 	Font();
 	Font(std::string fontPath, int size);
+	~Font();
 
 	void init(std::string fontPath, int size);
 	void obtainTextData(std::string text, Color color, SDL_Renderer* renderer, SDL_Texture** texture, SDL_Rect* bounds, glm::ivec2 position);

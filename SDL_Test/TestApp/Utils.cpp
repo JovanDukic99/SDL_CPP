@@ -48,6 +48,15 @@ bool Utils::isPointInsideBounds(glm::ivec2 mouseCoords, SDL_Rect bounds) {
     return false;
 }
 
+bool Utils::isPointInsideBounds(glm::ivec2 mouseCoords, glm::ivec4 bounds) {
+    if (mouseCoords.x >= bounds.x && mouseCoords.x <= bounds.x + bounds.z) {
+        if (mouseCoords.y >= bounds.y && mouseCoords.y <= bounds.y + bounds.w) {
+            return true;
+        }
+    }
+    return false;
+}
+
 int Utils::calculateRGBValueFromPositon(int x, int A, int B, int C) {
     return ((x - A) / (float)B) * C;
 }
@@ -345,4 +354,79 @@ void Utils::setActionState(int ID) {
         Controller::getInstance()->setMode(Mode::PAINTING);
         break;
     }
+}
+
+void Utils::drawText(std::string text, Color color, SDL_Renderer* renderer, Font* font, glm::ivec2 position) {
+    SDL_Rect bounds;
+    SDL_Texture* texture = nullptr;
+    font->obtainTextData(text, color, renderer, &texture, &bounds, position);
+    SDL_RenderCopy(renderer, texture, NULL, &bounds);
+    SDL_DestroyTexture(texture);
+}
+
+void Utils::drawText(std::string text, Color color, SDL_Renderer* renderer, Font* font, glm::ivec2 position, int width) {
+    SDL_Rect bounds;
+    SDL_Texture* texture = nullptr;
+    font->obtainTextData(text, color, renderer, &texture, &bounds, position);
+
+    bounds.x = width / 2 - bounds.w / 2; // center the text horizontally on the panel
+    bounds.y = bounds.y - bounds.h / 2; 
+
+    SDL_RenderCopy(renderer, texture, NULL, &bounds);
+    SDL_DestroyTexture(texture);
+}
+
+void Utils::drawRectangle(Color buttonColor,SDL_Renderer* renderer, glm::ivec4 posisiton) {
+    SDL_Rect bounds = { posisiton.x, posisiton.y, posisiton.z, posisiton.w };
+    SDL_SetRenderDrawColor(renderer, buttonColor.getR(), buttonColor.getG(), buttonColor.getB(), buttonColor.getA());
+    SDL_RenderFillRect(renderer, &bounds);
+}
+
+void Utils::drawButton(Color buttonColor, std::string text, Color textColor, SDL_Renderer* renderer, Font* font, glm::ivec4 posisiton) {
+    drawRectangle(buttonColor, renderer, posisiton);
+    drawCenteredText(text, textColor, renderer, font, posisiton);
+}
+
+void Utils::drawCenteredText(std::string text, Color color, SDL_Renderer* renderer, Font* font, glm::ivec4 dimensions) {
+    SDL_Rect bounds;
+    SDL_Texture* texture = nullptr;
+    font->obtainTextData(text, color, renderer, &texture, &bounds, glm::ivec2(0, 0));
+
+    bounds.x = dimensions.x + dimensions.z / 2 - bounds.w / 2; // center the text horizontally on the panel
+    bounds.y = dimensions.y + dimensions.w / 2 - bounds.h / 2; // center the text vertically on the panel
+
+    SDL_RenderCopy(renderer, texture, NULL, &bounds);
+    SDL_DestroyTexture(texture);
+}
+
+SDL_Window* Utils::createWindow(std::string title) {
+    SDL_Window* window = nullptr;
+
+    // create window
+    if (window == nullptr) {
+        window = SDL_CreateWindow(MESSAGE_PANEL.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MESSAGE_PANEL_WIDTH, MESSAGE_PANEL_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_ALWAYS_ON_TOP);
+    }
+
+    if (window == nullptr) {
+        std::cout << "Message panel creation failed." << std::endl;
+        return nullptr;;
+    }
+
+    return window;
+}
+
+SDL_Renderer* Utils::createRenderer(SDL_Window* window) {
+    SDL_Renderer* renderer = nullptr;
+
+    // create renderer
+    if (renderer == nullptr) {
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
+    }
+
+    if (renderer == nullptr) {
+        std::cout << "Message panel renderer failed to be created." << std::endl;
+        return nullptr;
+    }
+
+    return renderer;
 }

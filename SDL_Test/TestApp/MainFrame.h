@@ -7,6 +7,7 @@
 #include "Controller.h"
 #include "Timer.h"
 #include "ChatPanel.h"
+#include "MessagePanel.h"
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
 #include <SDL_IMAGE/SDL_image.h>
@@ -28,8 +29,10 @@ private:
 	InputManager* inputManager;
 	TextArea* textArea;
 	ColorPicker colorPicker;
+	MessagePanel messagePanel;
 	Controller* controller;
 	Font font;
+	Font normalFont;
 	SDL_Rect rubber;
 	MainPanel mainPanel;
 	ChatPanel chatPanel;
@@ -52,11 +55,11 @@ private:
 	void handleWindowEvents(SDL_Event& event);
 	void update();
 	bool updateColorPicker();
+	bool updateMessagePanel();
 	void initDraw();
 	void drawHUD();
 	void drawChatPanel();
 	void updateCursor();
-	void drawCircle(int x, int y, int radius);
 	void updateScreen();
 	void refresh();
 	void freeze();

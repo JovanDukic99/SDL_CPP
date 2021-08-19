@@ -1,6 +1,7 @@
 #pragma once
 #include "Color.h"
 #include "Pixel.h"
+#include "Font.h"
 #include "Controller.h"
 #include <glm/glm.hpp>
 #include <SDL/SDL_surface.h>
@@ -18,6 +19,7 @@ public:
 	static bool squareCollision(SDL_Rect r1, SDL_Rect r2);
 	static bool areColliding(SDL_Rect r1, SDL_Rect r2);
 	static bool isPointInsideBounds(glm::ivec2 mouseCoords, SDL_Rect bounds);
+	static bool isPointInsideBounds(glm::ivec2 mouseCoords, glm::ivec4 bounds);
 	static int calculateRGBValueFromPositon(int x, int A, int B, int C);
 	static int calculatePositionFromRGBValue(int A, int B, int C, int D);
 	static SDL_Cursor* getCursor(Mode state);
@@ -26,6 +28,13 @@ public:
 	static void paintWithBucket(glm::ivec2 seedCoords, Color color, SDL_Renderer* renderer);
 	static void setUtilityButton(int index, SDL_Renderer* renderer, SDL_Texture** texture, int* ID);
 	static void setActionState(int ID);
+	static void drawText(std::string text, Color color, SDL_Renderer* renderer, Font* font, glm::ivec2 position);
+	static void drawText(std::string text, Color color, SDL_Renderer* renderer, Font* font, glm::ivec2 position, int width);
+	static void drawRectangle(Color textColor, SDL_Renderer* renderer, glm::ivec4 posisiton);
+	static void drawButton(Color buttonColor, std::string text, Color textColor, SDL_Renderer* renderer, Font* font, glm::ivec4 posisiton);
+	static void drawCenteredText(std::string text, Color color, SDL_Renderer* renderer, Font* font, glm::ivec4 dimensions);
+	static SDL_Window* createWindow(std::string title);
+	static SDL_Renderer* createRenderer(SDL_Window* window);
 private:
 	static glm::fvec2 lerp(glm::fvec2 p1, glm::fvec2 p2, float t);
 	static Pixel getPixel(glm::ivec2 position, SDL_Surface* surface);

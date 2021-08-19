@@ -20,9 +20,9 @@ void TextArea::draw() {
 }
 
 void TextArea::takeScreenshot() {
-	SDL_Surface* sshot = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+	SDL_Surface* sshot = SDL_CreateRGBSurface(0, INPUT_PANEL_WIDTH + 10, INPUT_PANEL_HEIGHT + 10, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 
-	SDL_Rect rect = { 0, MAIN_PANEL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT };
+	SDL_Rect rect = { INPUT_PANEL_START_X, INPUT_PANEL_START_Y, INPUT_PANEL_WIDTH + 10, INPUT_PANEL_HEIGHT + 10};
 
 	SDL_RenderReadPixels(renderer, &rect, SDL_PIXELFORMAT_ARGB8888, sshot->pixels, sshot->pitch);
 
@@ -34,7 +34,7 @@ void TextArea::takeScreenshot() {
 }
 
 void TextArea::drawScreenshot() {
-	SDL_Rect dest = { 0, MAIN_PANEL_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - MAIN_PANEL_HEIGHT };
+	SDL_Rect dest = { INPUT_PANEL_START_X, INPUT_PANEL_START_Y, INPUT_PANEL_WIDTH + 10, INPUT_PANEL_HEIGHT + 10};
 	SDL_RenderCopy(renderer, screenshot, NULL, &dest);
 }
 
@@ -43,8 +43,15 @@ void TextArea::updateIndicatorTimer(Uint32 deltaTime) {
 }
 
 void TextArea::updateText() {
-	if (inputManager->isAppend()) {
+	if (indicatorPosition.x >= INPUT_PANEL_START_X + INPUT_PANEL_WIDTH - 10) {
+		return;
+	} else if (inputManager->isAppend()) {
 		std::string newText = inputManager->getText();
+
+		if (newText == " ") {
+			return;
+		}
+
 		for (size_t i = 0; i < newText.size(); i++) {
 			textLines[index].insert(textLines[index].begin() + indicatorIndex, newText[i]);
 			moveIndicatorRight();
@@ -187,6 +194,14 @@ void TextArea::downAction() {
 
 }
 
+void TextArea::enterAction() {
+	setIndicatorState(IndicatorState::ENTER);
+
+	for (int i = 0; i <= maxIndex; i++) {
+		chatPanel->addMessage(textLines[i]);
+	}
+}
+
 void TextArea::backspaceAction(Uint32 deltaTime) {
 	if (buttonTimer > 1000 && removeCharacter()) {
 		inputManager->setAppend(true);
@@ -196,7 +211,11 @@ void TextArea::backspaceAction(Uint32 deltaTime) {
 	}
 }
 
-void TextArea::enterAction() {
+void TextArea::newLine() {
+	if (indicatorPosition.y + TTF_FontHeight(font.getFont()) > INPUT_PANEL_START_Y + INPUT_PANEL_HEIGHT) {
+		return;
+	}
+
 	hideIndicator();
 
 	index++;
@@ -217,7 +236,6 @@ void TextArea::enterAction() {
 	maxIndex++;
 
 	inputManager->setAppend(true);
-	setIndicatorState(IndicatorState::ENTER);
 }
 
 void TextArea::moveIndicatorLeft() {
@@ -273,7 +291,7 @@ void TextArea::drawText() {
 		}
 
 		if (dimension.x > 0) {
-			drawTextBounds();
+			//drawTextBounds();
 		}
 	}
 }
@@ -316,50 +334,51 @@ void TextArea::update(Uint32 deltaTime) {
 		changeState(IndicatorState::BACKSPACE);
 	}
 	else if (!isLeft() && inputManager->isKeyPressed(SDLK_LEFT)) {
-		if (decreaseIndicatorPos()) {
+		/*if (decreaseIndicatorPos()) {
 			hideIndicator();
 			moveIndicatorLeft();
 		}
 		else {
 			upAction();
 		}
-		changeState(IndicatorState::LEFT);
+		changeState(IndicatorState::LEFT);*/
 	}
 	else if (!isRight() && inputManager->isKeyPressed(SDLK_RIGHT)) {
-		hideIndicator();
+		/*hideIndicator();
 		moveIndicatorRight();
 
 		if (!increaseIndicatorPos()) {
 			rightDown();
 		}
 
-		changeState(IndicatorState::RIGHT);
+		changeState(IndicatorState::RIGHT);*/
 	}
 	else if (!isUp() && inputManager->isKeyPressed(SDLK_UP)) {
-		upAction();
-		changeState(IndicatorState::UP);
+		/*upAction();
+		changeState(IndicatorState::UP);*/
 	}
 	else if (!isDown() && inputManager->isKeyPressed(SDLK_DOWN)) {	
-		downAction();
-		changeState(IndicatorState::DOWN);
+		/*downAction();
+		changeState(IndicatorState::DOWN);*/
 	}
 	else if (!isEnter() && (inputManager->isKeyPressed(SDLK_RETURN) || inputManager->isKeyPressed(SDLK_KP_ENTER))) {
+		// newLine();
 		enterAction();
 	}
 	else if (isBackspace() && inputManager->isKeyPressed(SDLK_BACKSPACE)) {
 		backspaceAction(deltaTime);
 	}
 	else if (isLeft() && inputManager->isKeyPressed(SDLK_LEFT)) {
-		leftAction(deltaTime);
+		// leftAction(deltaTime);
 	}
 	else if (isRight() && inputManager->isKeyPressed(SDLK_RIGHT)) {
-		rightAction(deltaTime);
+		// rightAction(deltaTime);
 	}
 	else if (!inputManager->isKeyPressed(SDLK_RIGHT) && isRight()) {
-		setIndicatorState(IndicatorState::NONE);
+		// setIndicatorState(IndicatorState::NONE);
 	}
 	else if (!inputManager->isKeyPressed(SDLK_LEFT) && isLeft()) {
-		setIndicatorState(IndicatorState::NONE);
+		// setIndicatorState(IndicatorState::NONE);
 	}
 	else if (!inputManager->isKeyPressed(SDLK_BACKSPACE) && isBackspace()) {
 		setIndicatorState(IndicatorState::NONE);
@@ -368,10 +387,14 @@ void TextArea::update(Uint32 deltaTime) {
 		setIndicatorState(IndicatorState::NONE);
 	}
 	else if (!inputManager->isKeyPressed(SDLK_UP) && isUp()) {
-		setIndicatorState(IndicatorState::NONE);
+		// setIndicatorState(IndicatorState::NONE);
 	}
 	else if (!inputManager->isKeyPressed(SDLK_DOWN) && isDown()) {
-		setIndicatorState(IndicatorState::NONE);
+		// setIndicatorState(IndicatorState::NONE);
 	}
+}
+
+void TextArea::setChatPanel(ChatPanel* chatPanel) {
+	this->chatPanel = chatPanel;
 }
 

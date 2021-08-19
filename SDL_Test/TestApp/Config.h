@@ -57,14 +57,14 @@ static const int CHAT_PANEL_START_Y = MAIN_PANEL_HEIGHT;
 
 // text panel config
 static const int TEXT_PANEL_WIDTH = 250;
-static const int TEXT_PANEL_HEIGHT = 400;
+static const int TEXT_PANEL_HEIGHT = 507;
 
 static const int TEXT_PANEL_START_X = ((SCREEN_WIDTH + (SCREEN_WIDTH - CHAT_PANEL_WIDTH)) - TEXT_PANEL_WIDTH) / 2;
 static const int TEXT_PANEL_START_Y = CHAT_PANEL_START_Y + 25;
 
 // input panel config
 static const int INPUT_PANEL_WIDTH = 250;
-static const int INPUT_PANEL_HEIGHT = 150;
+static const int INPUT_PANEL_HEIGHT = 40;
 
 static const int INPUT_PANEL_START_X = ((SCREEN_WIDTH + (SCREEN_WIDTH - CHAT_PANEL_WIDTH)) - INPUT_PANEL_WIDTH) / 2;
 static const int INPUT_PANEL_START_Y = (SCREEN_HEIGHT + (TEXT_PANEL_START_Y + TEXT_PANEL_HEIGHT) - INPUT_PANEL_HEIGHT) / 2;
@@ -119,11 +119,11 @@ static const int UTILITY_PANEL_WIDTH = 2 * UTILITY_BUTTON_WIDTH + 15;
 static const int UTILITY_PANEL_HEIGHT = COLOR_PANEL_HEIGHT;
 
 // brush button confit
-static const int PANEL_BUTTON_WIDTH = 64;
-static const int PANEL_BUTTON_HEIGHT = 64;
+static const int PANEL_BUTTON_WIDTH = 32;
+static const int PANEL_BUTTON_HEIGHT = 32;
 
 static const int BUTTON_START_X = COLOR_PANEL_WIDTH + 3 * UNIT_WIDTH;
-static const int BUTTON_START_Y = 25;
+static const int BUTTON_START_Y = 35;
 
 static const int BUTTON_SAPWN_DIFF_X = 2 * UNIT_WIDTH;
 static const int BUTTON_SAPWN_DIFF_Y = UNIT_HEIGHT;
@@ -197,8 +197,17 @@ static const int SUBMIT_BUTTON_START_X = (COLOR_PICKER_WIDTH - SUBMIT_BUTTON_WID
 static const int SUBMIT_BUTTON_START_Y = COLOR_PICKER_HEIGHT - SUBMIT_BUTTON_HEIGHT - 20;
 
 // brush label config
-static const int BRUSH_LABEL_X = BUTTON_START_X + PANEL_BUTTON_WIDTH + UNIT_WIDTH / 2 - 2;
-static const int BRUSH_LABEL_Y = BUTTON_START_Y + PANEL_BUTTON_HEIGHT / 2;
+static const int BRUSH_LABEL_X = BUTTON_START_X + PANEL_BUTTON_WIDTH + UNIT_WIDTH / 2 + 2;
+static const int BRUSH_LABEL_Y = BUTTON_START_Y - 2;
 
 // brush config
 static const int BRUSH_INCREMENT = 1;
+
+// messagePanel config
+static const int MESSAGE_PANEL_WIDTH = 500;
+static const int MESSAGE_PANEL_HEIGHT = 300;
+
+static const int MESSAGE_PANEL_START_X = 50;
+static const int MESSAGE_PANEL_START_Y = 50;
+
+static const std::string MESSAGE_PANEL = "Notification!";

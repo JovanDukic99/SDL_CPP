@@ -91,15 +91,15 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="ChatPanel.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="MessagePanel.cpp">
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainFrame.h">
       <Filter>Header Files\gui</Filter>
-    </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Header Files\config</Filter>
     </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>Header Files\utils</Filter>
@@ -140,8 +140,14 @@
     <ClInclude Include="GUIBase.h">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
     <ClInclude Include="ChatPanel.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="MessagePanel.h">
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
