@@ -49,6 +49,15 @@ void Font::setFont(TTF_Font*& font) {
 	this->font = font;
 }
 
+glm::ivec2 Font::getTextDimensions(std::string text) {
+	SDL_Surface* fontSurface = ImageLoader::getFontSurface(text, font, BLACK);
+	return glm::ivec2(fontSurface->w, fontSurface->h);
+}
+
+int Font::getTextHeight() {
+	return TTF_FontHeight(font);
+}
+
 TTF_Font* Font::getFont() const {
 	return font;
 }

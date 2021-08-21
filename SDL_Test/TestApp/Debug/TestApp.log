@@ -1,11 +1,7 @@
-﻿  ColorPicker.cpp
+﻿  Main.cpp
   MainFrame.cpp
-  MainPanel.cpp
-  MessagePanel.cpp
-  Utils.cpp
-D:\Users\Jovan\c++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(61,33): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
-D:\Users\Jovan\c++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(65,32): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
-D:\Users\Jovan\c++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(186,20): warning C4244: 'argument': conversion from 'float' to 'const unsigned int', possible loss of data
-D:\Users\Jovan\c++\SDL_Testing\SDL_Test\TestApp\Utils.cpp(187,20): warning C4244: 'argument': conversion from 'float' to 'const unsigned int', possible loss of data
+  TextLine.cpp
+D:\Users\Jovan\c++\SDL_Testing\SDL_Test\TestApp\TextLine.cpp(39,46): warning C4018: '<': signed/unsigned mismatch
+  TextPanel.cpp
   Generating Code...
   TestApp.vcxproj -> D:\Users\Jovan\c++\SDL_Testing\SDL_Test\Debug\TestApp.exe

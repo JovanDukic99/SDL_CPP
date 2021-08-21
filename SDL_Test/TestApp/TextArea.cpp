@@ -195,10 +195,12 @@ void TextArea::downAction() {
 }
 
 void TextArea::enterAction() {
-	setIndicatorState(IndicatorState::ENTER);
+	if (chatPanel != nullptr) {
+		setIndicatorState(IndicatorState::ENTER);
 
-	for (int i = 0; i <= maxIndex; i++) {
-		chatPanel->addMessage(textLines[i]);
+		for (int i = 0; i <= maxIndex; i++) {
+			chatPanel->addMessage(textLines[i]);
+		}
 	}
 }
 

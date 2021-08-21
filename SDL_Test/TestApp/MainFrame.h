@@ -8,6 +8,7 @@
 #include "Timer.h"
 #include "ChatPanel.h"
 #include "MessagePanel.h"
+#include "TextPanel.h"
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
 #include <SDL_IMAGE/SDL_image.h>
@@ -30,6 +31,7 @@ private:
 	TextArea* textArea;
 	ColorPicker colorPicker;
 	MessagePanel messagePanel;
+	TextPanel textPanel;
 	Controller* controller;
 	Font font;
 	Font normalFont;
@@ -56,6 +58,7 @@ private:
 	void update();
 	bool updateColorPicker();
 	bool updateMessagePanel();
+	bool updateTextPanel();
 	void initDraw();
 	void drawHUD();
 	void drawChatPanel();

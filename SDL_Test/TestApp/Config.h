@@ -1,6 +1,10 @@
 #pragma once
 #include <string>
 
+#define DESIRED_FPS 60
+#define MILISECONDS 1000
+#define DESIRED_FRAME_TIME (MILISECONDS / DESIRED_FPS)
+
 // screen config
 static const std::string TITLE = "Game";
 static const int SCREEN_WIDTH = 1080;

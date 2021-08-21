@@ -5,10 +5,6 @@
 #include "ImageLoader.h"
 #include <iostream>
 
-#define DESIRED_FPS 60
-#define MILISECONDS 1000
-#define DESIRED_FRAME_TIME (MILISECONDS / DESIRED_FPS)
-
 MainFrame::MainFrame() : gameState(GameState::PLAY) {
 	init();
 }
@@ -204,10 +200,22 @@ void MainFrame::update() {
 	if (!inputManager->isKeyPressed(SDL_BUTTON_LEFT)) {
 		start = mouseCoords;
 	}
+		// should open textPanel
+		if (inputManager->isKeyPressed(SDLK_d) && !textPanel.isVisible() && !messagePanel.isVisible()) {
+			textPanel.init(&font);
+			controller->setMode(Mode::NONE);
+			updateCursor();
+			return;
+		}
+
+		// update textPanel
+		if (updateTextPanel()) {
+			return;
+		}
 
 		// should open messagePanel
-		if (inputManager->isKeyPressed(SDLK_a) && !messagePanel.isVisible()) {
-			messagePanel.init("Message has arrived", &font, inputManager);
+		if (inputManager->isKeyPressed(SDLK_a) && !messagePanel.isVisible() && !textPanel.isVisible()) {
+			messagePanel.init("Message has arrived", &font);
 			controller->setMode(Mode::NONE);
 			updateCursor();
 			return;
@@ -356,6 +364,17 @@ bool MainFrame::updateMessagePanel() {
 		messagePanel.update();
 		if (messagePanel.isVisible()) {
 			messagePanel.draw();
+		}
+		return true;
+	}
+	return false;
+}
+
+bool MainFrame::updateTextPanel() {
+	if (textPanel.isVisible()) {
+		textPanel.update();
+		if (textPanel.isVisible()) {
+			textPanel.draw();
 		}
 		return true;
 	}

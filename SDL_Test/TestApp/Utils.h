@@ -33,8 +33,10 @@ public:
 	static void drawRectangle(Color textColor, SDL_Renderer* renderer, glm::ivec4 posisiton);
 	static void drawButton(Color buttonColor, std::string text, Color textColor, SDL_Renderer* renderer, Font* font, glm::ivec4 posisiton);
 	static void drawCenteredText(std::string text, Color color, SDL_Renderer* renderer, Font* font, glm::ivec4 dimensions);
-	static SDL_Window* createWindow(std::string title);
+	static SDL_Window* createWindow(std::string title, glm::ivec2 dimensions);
 	static SDL_Renderer* createRenderer(SDL_Window* window);
+	static SDL_Texture* makeScreenshot(glm::ivec4 dimensions, SDL_Renderer* renderer);
+	static void drawScreenshot(glm::ivec4 dimensions, SDL_Renderer* renderer, SDL_Texture* screenshot);
 private:
 	static glm::fvec2 lerp(glm::fvec2 p1, glm::fvec2 p2, float t);
 	static Pixel getPixel(glm::ivec2 position, SDL_Surface* surface);

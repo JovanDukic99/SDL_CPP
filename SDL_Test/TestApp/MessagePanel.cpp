@@ -3,7 +3,7 @@
 #include "Utils.h"
 #include <iostream>
 
-MessagePanel::MessagePanel() : window(nullptr), renderer(nullptr), font(nullptr), inputManager(nullptr), button(), visible(false), buttonColor(GRAY), isPressed(false) {
+MessagePanel::MessagePanel() : Window(), font(nullptr), button(), buttonColor(GRAY), isPressed(false) {
 
 }
 
@@ -11,40 +11,15 @@ MessagePanel::~MessagePanel() {
 	closeWindow();
 }
 
-void MessagePanel::init(std::string message, Font* font, InputManager* inputManager) {
-	initWindow();
-	initRenderer();
+void MessagePanel::init(std::string message, Font* font) {
+	Window::init("Notification!", glm::ivec2(MESSAGE_PANEL_WIDTH, MESSAGE_PANEL_HEIGHT));
 	initComponents();
 	setMessage(message);
 	setFont(font);
-	setInputManager(inputManager);
-	setVisible(true);
-}
-
-void MessagePanel::initWindow() {
-	window = Utils::createWindow("Notification!");
-}
-
-void MessagePanel::initRenderer(){
-	renderer = Utils::createRenderer(window);
 }
 
 void MessagePanel::initComponents() {
 	button = { 200, 200, 100, 50 };
-}
-
-void MessagePanel::reset() {
-	if (window != nullptr) {
-		SDL_DestroyWindow(window);
-		window = nullptr;
-	}
-
-	if (renderer != nullptr) {
-		SDL_DestroyRenderer(renderer);
-		renderer = nullptr;
-	}
-
-	
 }
 
 void MessagePanel::setMessage(std::string message) {
@@ -53,10 +28,6 @@ void MessagePanel::setMessage(std::string message) {
 
 void MessagePanel::setFont(Font* font) {
 	this->font = font;
-}
-
-void MessagePanel::setInputManager(InputManager* inputManager) {
-	this->inputManager = inputManager;
 }
 
 void MessagePanel::draw() {
@@ -84,14 +55,6 @@ void MessagePanel::update() {
 	}
 }
 
-bool MessagePanel::isVisible() {
-	return visible;
-}
-
-void MessagePanel::setVisible(bool visible) {
-	this->visible = visible;
-}
-
 void MessagePanel::setIsPressed(bool isPressed) {
 	this->isPressed = isPressed;
 }
@@ -101,8 +64,7 @@ void MessagePanel::setButtonColor(Color color) {
 }
 
 void MessagePanel::closeWindow() {
-	reset();
-	setVisible(false);
+	Window::close();
 	setIsPressed(false);
 	setButtonColor(GRAY);
 }

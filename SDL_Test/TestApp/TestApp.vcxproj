@@ -158,8 +158,11 @@
     <ClCompile Include="MessagePanel.cpp" />
     <ClCompile Include="Pixel.cpp" />
     <ClCompile Include="TextArea.cpp" />
+    <ClCompile Include="TextLine.cpp" />
+    <ClCompile Include="TextPanel.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChatPanel.h" />
@@ -177,8 +180,11 @@
     <ClInclude Include="MessagePanel.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="TextArea.h" />
+    <ClInclude Include="TextLine.h" />
+    <ClInclude Include="TextPanel.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

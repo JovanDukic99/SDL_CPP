@@ -399,12 +399,12 @@ void Utils::drawCenteredText(std::string text, Color color, SDL_Renderer* render
     SDL_DestroyTexture(texture);
 }
 
-SDL_Window* Utils::createWindow(std::string title) {
+SDL_Window* Utils::createWindow(std::string title, glm::ivec2 dimensions) {
     SDL_Window* window = nullptr;
 
     // create window
     if (window == nullptr) {
-        window = SDL_CreateWindow(MESSAGE_PANEL.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MESSAGE_PANEL_WIDTH, MESSAGE_PANEL_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_ALWAYS_ON_TOP);
+        window = SDL_CreateWindow(MESSAGE_PANEL.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, dimensions.x, dimensions.y, SDL_WINDOW_SHOWN | SDL_WINDOW_ALWAYS_ON_TOP);
     }
 
     if (window == nullptr) {
@@ -429,4 +429,26 @@ SDL_Renderer* Utils::createRenderer(SDL_Window* window) {
     }
 
     return renderer;
+}
+
+SDL_Texture* Utils::makeScreenshot(glm::ivec4 dimensions, SDL_Renderer* renderer) {
+    SDL_Texture* screenshot = nullptr;
+    SDL_Surface* sshot = SDL_CreateRGBSurface(0, dimensions.z + 10, dimensions.w + 10, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+
+    SDL_Rect rect = { dimensions.x, dimensions.y, dimensions.z + 10, dimensions.w + 10 };
+
+    SDL_RenderReadPixels(renderer, &rect, SDL_PIXELFORMAT_ARGB8888, sshot->pixels, sshot->pitch);
+
+    if ((screenshot = SDL_CreateTextureFromSurface(renderer, sshot)) == nullptr) {
+        std::cout << "Screenshot creation failed." << std::endl;
+    }
+
+    SDL_FreeSurface(sshot);
+
+    return screenshot;
+}
+
+void Utils::drawScreenshot(glm::ivec4 dimensions, SDL_Renderer* renderer, SDL_Texture* screenshot) {
+    SDL_Rect dest = { dimensions.x, dimensions.y, dimensions.z + 10, dimensions.w + 10 };
+    SDL_RenderCopy(renderer, screenshot, NULL, &dest);
 }
