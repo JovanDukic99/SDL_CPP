@@ -1,7 +1,6 @@
 #pragma once
 #include "InputManager.h"
 #include "MainPanel.h"
-#include "TextArea.h"
 #include "ColorPicker.h"
 #include "Font.h"
 #include "Controller.h"
@@ -28,7 +27,6 @@ private:
 	SDL_Renderer* renderer;
 	GameState gameState;
 	InputManager* inputManager;
-	TextArea* textArea;
 	ColorPicker colorPicker;
 	MessagePanel messagePanel;
 	TextPanel textPanel;
@@ -41,9 +39,12 @@ private:
 	Timer timer;
 	glm::ivec2 start;
 	glm::ivec2 end;
+	Uint32 panelTimer;
+	bool showed;
 public:
 	MainFrame();
 	~MainFrame();
+	void callback(std::string username);
 private:
 	void init();
 	void initSDL();
@@ -56,18 +57,24 @@ private:
 	void handleInputEvents();
 	void handleWindowEvents(SDL_Event& event);
 	void update();
-	bool updateColorPicker();
-	bool updateMessagePanel();
-	bool updateTextPanel();
+	void updateColorPicker();
+	void updateMessagePanel();
+	void updateTextPanel();
+	void updateMainPanel();
+	void updateCursorActivity(glm::ivec2 mouseCoords);
 	void initDraw();
 	void drawHUD();
 	void drawChatPanel();
 	void updateCursor();
 	void updateScreen();
-	void refresh();
-	void freeze();
-	void resetTextArea();
 	void reset();
+	void returnToPreviousState();
+	void savePreviousState();
+	void setMode(Mode mode);
+	void paint(glm::ivec2 mouseCoords);
+	void erase(glm::ivec2 mouseCoords);
+	void updatePanelTimer(Uint32 deltaTime);
+	void updateChatPanel();
 	bool doRefresh();
 };
 

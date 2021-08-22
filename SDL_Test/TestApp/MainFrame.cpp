@@ -5,7 +5,7 @@
 #include "ImageLoader.h"
 #include <iostream>
 
-MainFrame::MainFrame() : gameState(GameState::PLAY) {
+MainFrame::MainFrame() : gameState(GameState::PLAY), panelTimer(0), showed(false) {
 	init();
 }
 
@@ -94,6 +94,9 @@ void MainFrame::initComponents() {
 
 	// send font to charPanel
 	chatPanel.setFont(&normalFont);
+
+	// initCharPanel
+	chatPanel.init(renderer, &normalFont);
 }
 
 void MainFrame::initFont() {
@@ -189,7 +192,7 @@ void MainFrame::handleWindowEvents(SDL_Event& event) {
 void MainFrame::update() {
 	glm::ivec2 mouseCoords = inputManager->getMouseCoordinates();
 
-	chatPanel.update(DESIRED_FRAME_TIME);
+	updatePanelTimer(DESIRED_FRAME_TIME);
 
 	if (inputManager->isKeyPressed(SDLK_ESCAPE)) {
 		gameState = GameState::EXIT;
@@ -200,153 +203,28 @@ void MainFrame::update() {
 	if (!inputManager->isKeyPressed(SDL_BUTTON_LEFT)) {
 		start = mouseCoords;
 	}
-		// should open textPanel
-		if (inputManager->isKeyPressed(SDLK_d) && !textPanel.isVisible() && !messagePanel.isVisible()) {
-			textPanel.init(&font);
-			controller->setMode(Mode::NONE);
-			updateCursor();
-			return;
-		}
 
-		// update textPanel
-		if (updateTextPanel()) {
-			return;
-		}
+	updateColorPicker();
+	// updateMessagePanel();
+	updateTextPanel();
 
-		// should open messagePanel
-		if (inputManager->isKeyPressed(SDLK_a) && !messagePanel.isVisible() && !textPanel.isVisible()) {
-			messagePanel.init("Message has arrived", &font);
-			controller->setMode(Mode::NONE);
-			updateCursor();
-			return;
-		}
+	if (textPanel.isVisible() || messagePanel.isVisible() || colorPicker.isVisible()) {
+		return;
+	}
 
-		// update messagePanel
-		if (updateMessagePanel()) {
-			return;
-		}
-
-		// should open colorPicker
-		if (!colorPicker.isVisible() && mainPanel.openColorPicker()) {
-			colorPicker.init(mainPanel.getSelectedColor());
-			controller->setMode(Mode::NONE);
-			updateCursor();
-			return;
-		}
-
-		// update colorPicker
-		if (updateColorPicker()) {
-			return;
-		}
-
-		// save previous state and switch to hand cursor (mainPanel)
-		if (!controller->isNone() && mouseCoords.y < MAIN_PANEL_HEIGHT) {
-			controller->updatePreviousMode();
-			controller->setMode(Mode::NONE);
-			refresh();
-			updateCursor();
-			return;
-		}
-
-		// save previous state and switch to hand cursor (chatPanel)
-		if (!controller->isNone() && mouseCoords.x > CHAT_PANEL_START_X && mouseCoords.y > CHAT_PANEL_START_Y) {
-			controller->updatePreviousMode();
-			controller->setMode(Mode::NONE);
-			refresh();
-			updateCursor();
-			return;
-		}
-
-		// check for update in chatPanel
-		if (controller->isNone() && mouseCoords.x > CHAT_PANEL_START_X && mouseCoords.y > CHAT_PANEL_START_Y) {
-			if (textArea == nullptr && inputManager->isKeyPressed(SDL_BUTTON_LEFT) && Utils::isPointInsideBounds(mouseCoords, SDL_Rect {INPUT_PANEL_START_X, INPUT_PANEL_START_Y, INPUT_PANEL_WIDTH, INPUT_PANEL_HEIGHT})) {
-				textArea = new TextArea(glm::ivec2(INPUT_PANEL_START_X + 4, INPUT_PANEL_START_Y + INPUT_PANEL_HEIGHT / 2), BLACK, normalFont, renderer);
-				textArea->setChatPanel(&chatPanel);
-			}
-			else if (textArea != nullptr) {
-				textArea->update(DESIRED_FRAME_TIME);
-				textArea->draw();
-				refresh();
-			}
-			return;
-		}
-
-		// check if update happened in mainPanel
-		if (controller->isNone() && inputManager->isKeyPressed(SDL_BUTTON_LEFT)) {
-			if (mainPanel.update()) {
-				refresh();
-				drawHUD();
-				inputManager->releaseKey(SDL_BUTTON_LEFT);
-				return;
-			}
-		}
-
-		// switch to previous state
-		if (controller->isNone() && mouseCoords.y > MAIN_PANEL_HEIGHT) {
-			controller->setMode(controller->getPreviousActionState());
-			controller->setScreenState(ScreenState::REFRESH);
-			updateCursor();
-			return;
-		}
-
-		// erasing
-		if (inputManager->isKeyPressed(SDL_BUTTON_LEFT) && controller->isEraseing() && inputManager->isMoving()) {
-
-			end = mouseCoords;
-
-			std::vector<SDL_Rect> path = Utils::getLinePath(start, end, RUBBER_WIDTH, RUBBER_HEIGHT);
-
-			for (size_t i = 0; i < path.size(); i++) {
-				SDL_Rect bounds = path[i];
-
-				SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-				SDL_RenderFillRect(renderer, &bounds);
-			}
-
-			start = end;
-
-			refresh();
-
-			return;
-		}
-		
-		// painting
-		if (inputManager->isKeyPressed(SDL_BUTTON_LEFT) && controller->isPainting() && inputManager->isMoving()) {
-			refresh();
-
-			if (mouseCoords.y > MAIN_PANEL_HEIGHT) {
-				if (controller->isPainting()) {
-					int brushSize = mainPanel.getBrushSize();
-					Color color = mainPanel.getSelectedColor();
-
-					int width = brushSize * UNIT_WIDTH / 20;
-					int height = brushSize * UNIT_WIDTH / 20;
-
-					end = mouseCoords;
-
-					std::vector<SDL_Rect> path = Utils::getLinePath(start, end, width, height);
-
-					for (size_t i = 0; i < path.size(); i++) {
-						SDL_Rect bounds = path[i];
-
-						SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
-						SDL_RenderFillRect(renderer, &bounds);
-					}
-
-					inputManager->setMoving(false);
-
-					start = end;
-
-					refresh();
-					drawHUD();
-					drawChatPanel();
-				}
-			}
-		}
+	updateChatPanel();
+	updateCursorActivity(mouseCoords);
+	paint(mouseCoords);
+	erase(mouseCoords);
 }
 
-bool MainFrame::updateColorPicker() {
-	if (colorPicker.isVisible()) {
+void MainFrame::updateColorPicker() {
+	// should open colorPicker
+	if (!colorPicker.isVisible() && mainPanel.openColorPicker()) {
+		colorPicker.init(mainPanel.getSelectedColor());
+		controller->setMode(Mode::NONE);
+		updateCursor();
+	}else if (colorPicker.isVisible()) {
 		colorPicker.update();
 		if (!colorPicker.isVisible()) {
 			mainPanel.setSelectedColor(colorPicker.getColor());
@@ -354,31 +232,37 @@ bool MainFrame::updateColorPicker() {
 			controller->setScreenState(ScreenState::REFRESH);
 			drawHUD();
 		}
-		return true;
 	}
-	return false;
 }
 
-bool MainFrame::updateMessagePanel() {
-	if (messagePanel.isVisible()) {
+void MainFrame::updateMessagePanel() {
+	// should open messagePanel
+	if (inputManager->isKeyPressed(SDLK_a) && !messagePanel.isVisible() && !textPanel.isVisible()) {
+		messagePanel.init("Message has arrived", &font);
+		controller->setMode(Mode::NONE);
+		updateCursor();
+	}
+	else if (messagePanel.isVisible()) {
 		messagePanel.update();
 		if (messagePanel.isVisible()) {
 			messagePanel.draw();
 		}
-		return true;
 	}
-	return false;
 }
 
-bool MainFrame::updateTextPanel() {
+void MainFrame::updateTextPanel() {
 	if (textPanel.isVisible()) {
 		textPanel.update();
 		if (textPanel.isVisible()) {
 			textPanel.draw();
 		}
-		return true;
 	}
-	return false;
+}
+
+void MainFrame::updateMainPanel() {
+	if (mainPanel.update()) {
+		inputManager->releaseKey(SDL_BUTTON_LEFT);
+	}
 }
 
 void MainFrame::initDraw() {
@@ -468,30 +352,122 @@ void MainFrame::updateCursor() {
 }
 
 void MainFrame::updateScreen() {
-	if (doRefresh()) {
-		SDL_RenderPresent(renderer);
-		freeze();
-	}
+	SDL_RenderPresent(renderer);
 }
 
 bool MainFrame::doRefresh() {
 	return controller->getScreenState() == ScreenState::REFRESH;
 }
 
-void MainFrame::refresh() {
-	controller->setScreenState(ScreenState::REFRESH);
-}
-
-void MainFrame::freeze() {
-	controller->setScreenState(ScreenState::FREEZE);
-}
-
-void MainFrame::resetTextArea() {
-	delete textArea;
-	textArea = nullptr;
-}
-
 void MainFrame::reset() {
 	inputManager->setClickNumber(0);
 	inputManager->setTextInput(nullptr, false);
+}
+
+void MainFrame::returnToPreviousState() {
+	setMode(controller->getPreviousActionState());
+	updateCursor();
+}
+
+void MainFrame::savePreviousState() {
+	controller->updatePreviousMode();
+	controller->setMode(Mode::NONE);
+	updateCursor();
+}
+
+void MainFrame::setMode(Mode mode) {
+	controller->setMode(mode);
+}
+
+void MainFrame::paint(glm::ivec2 mouseCoords) {
+	if (inputManager->isKeyPressed(SDL_BUTTON_LEFT) && controller->isPainting() && inputManager->isMoving()) {
+		if (mouseCoords.y > MAIN_PANEL_HEIGHT) {
+			if (controller->isPainting()) {
+				int brushSize = mainPanel.getBrushSize();
+				Color color = mainPanel.getSelectedColor();
+
+				int width = brushSize * UNIT_WIDTH / 20;
+				int height = brushSize * UNIT_WIDTH / 20;
+
+				end = mouseCoords;
+
+				std::vector<SDL_Rect> path = Utils::getLinePath(start, end, width, height);
+
+				for (size_t i = 0; i < path.size(); i++) {
+					SDL_Rect bounds = path[i];
+
+					SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+					SDL_RenderFillRect(renderer, &bounds);
+				}
+
+				inputManager->setMoving(false);
+
+				start = end;
+			}
+		}
+	}
+}
+
+void MainFrame::erase(glm::ivec2 mouseCoords) {
+	if (inputManager->isKeyPressed(SDL_BUTTON_LEFT) && controller->isEraseing() && inputManager->isMoving()) {
+		end = mouseCoords;
+
+		std::vector<SDL_Rect> path = Utils::getLinePath(start, end, RUBBER_WIDTH, RUBBER_HEIGHT);
+
+		for (size_t i = 0; i < path.size(); i++) {
+			SDL_Rect bounds = path[i];
+
+			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+			SDL_RenderFillRect(renderer, &bounds);
+		}
+
+		start = end;
+
+		return;
+	}
+}
+
+void MainFrame::updatePanelTimer(Uint32 deltaTime) {
+	if (showed) {
+		return;
+	}
+	panelTimer += deltaTime;
+	if (panelTimer >= 2000) {
+		textPanel.init(&font);
+		controller->setMode(Mode::NONE);
+		updateCursor();
+		showed = true;
+	}
+}
+
+void MainFrame::updateChatPanel() {
+	chatPanel.update(DESIRED_FRAME_TIME);
+}
+
+void MainFrame::callback(std::string username) {
+	std::cout << username;
+}
+
+void MainFrame::updateCursorActivity(glm::ivec2 mouseCoords) {
+	// chat panel
+	if (mouseCoords.x > CHAT_PANEL_START_X && mouseCoords.y > CHAT_PANEL_START_Y) {
+		if (!controller->isNone()) {
+			savePreviousState();
+		}
+	}
+	// drawing area
+	else if (mouseCoords.x <= CHAT_PANEL_START_X && mouseCoords.y > MAIN_PANEL_HEIGHT) {
+		if (controller->isNone()) {
+			returnToPreviousState();
+		}
+	}
+	// main panel
+	else if (mouseCoords.y <= MAIN_PANEL_HEIGHT) {
+		if (!controller->isNone()) {
+			savePreviousState();
+		}
+		else if (inputManager->isKeyPressed(SDL_BUTTON_LEFT)) {
+			updateMainPanel();
+		}
+	}
 }

@@ -2,7 +2,7 @@
 
 Controller* Controller::INSTANCE = nullptr;
 
-Controller::Controller() : mode(Mode::NONE), screenState(ScreenState::REFRESH), previousMode(Mode::PAINTING), textPosition(0, 0) {
+Controller::Controller() : mode(Mode::NONE), screenState(ScreenState::REFRESH), previousMode(Mode::PAINTING), textPosition(0, 0), username("None") {
 
 }
 
@@ -46,6 +46,10 @@ std::string Controller::getText() const {
     return text;
 }
 
+std::string Controller::getUsername() const {
+    return username;
+}
+
 bool Controller::isNone() const {
     return mode == Mode::NONE;
 }
@@ -56,10 +60,6 @@ bool Controller::isPainting() const {
 
 bool Controller::isEraseing() const {
     return mode == Mode::ERASING;
-}
-
-bool Controller::isBucketPainting() const {
-    return mode == Mode::BUCKET_PAINTING;
 }
 
 bool Controller::isWriting() const {
@@ -93,6 +93,10 @@ void Controller::setIndicatorPosition(glm::ivec2 indicatorPosition) {
 
 void Controller::appendText(char* newText, int index) {
     text.insert(index, newText);
+}
+
+void Controller::setUsername(std::string name) {
+    this->username = name;
 }
 
 void Controller::resetText(){

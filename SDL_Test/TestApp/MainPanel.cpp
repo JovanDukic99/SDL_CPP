@@ -118,26 +118,21 @@ void MainPanel::initButtons() {
 
 	// ================= <Utility Buttons> ================= //
 	utilityButtons.reserve(4);
-	int index = 0;
 	for (size_t i = 0; i < 2; i++) {
-		for (size_t j = 0; j < 2; j++) {
-			SDL_Texture* texture = nullptr;
-			int ID = 0;
+		SDL_Texture* texture = nullptr;
+		int ID = 0;
 
-			Utils::setUtilityButton(index, renderer, &texture, &ID);
+		Utils::setUtilityButton(i, renderer, &texture, &ID);
 
-			SDL_Rect bounds;
+		SDL_Rect bounds;
 
-			bounds.w = UTILITY_BUTTON_WIDTH;
-			bounds.h = UTILITY_BUTTON_HEIGHT;
+		bounds.w = UTILITY_BUTTON_WIDTH;
+		bounds.h = UTILITY_BUTTON_HEIGHT;
 
-			bounds.x = UTILITY_BUTTON_START_X + j * UTILITY_BUTTON_HORIZONTAL_OFFSET;
-			bounds.y = UTILITY_BUTTON_START_Y + i * UTILITY_BUTTON_VERTICAL_OFFSET;
+		bounds.x = UTILITY_BUTTON_START_X + 2;
+		bounds.y = UTILITY_BUTTON_START_Y + i * UTILITY_BUTTON_VERTICAL_OFFSET;
 
-			utilityButtons.emplace_back(bounds, GREEN, texture, ID);
-
-			index++;
-		}
+		utilityButtons.emplace_back(bounds, GREEN, texture, ID);
 	}
 }
 

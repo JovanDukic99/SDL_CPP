@@ -271,33 +271,18 @@ void ColorPicker::draw() {
 	SDL_RenderFillRect(renderer, &bounds);
 
 	// draw red label
-	SDL_Texture* texture = nullptr;
-	font.obtainTextData(redLabel, BLACK, renderer, &texture, &bounds, glm::ivec2(LABEL_START_X, LABEL_START_Y));
-	SDL_RenderCopy(renderer, texture, NULL, &bounds);
-	SDL_DestroyTexture(texture);
+	Utils::drawText(redLabel, BLACK, renderer, &font, glm::ivec2(LABEL_START_X, LABEL_START_Y), COLOR_PICKER_WIDTH);
 
 	// draw green label
-	font.obtainTextData(greenLabel, BLACK, renderer, &texture, &bounds, glm::ivec2(LABEL_START_X, LABEL_START_Y + LABEL_OFFSET));
-	SDL_RenderCopy(renderer, texture, NULL, &bounds);
-	SDL_DestroyTexture(texture);
+	Utils::drawText(greenLabel, BLACK, renderer, &font, glm::ivec2(LABEL_START_X, LABEL_START_Y + LABEL_OFFSET), COLOR_PICKER_WIDTH);
 
 	// draw blue label
-	font.obtainTextData(blueLabel, BLACK, renderer, &texture, &bounds, glm::ivec2(LABEL_START_X, LABEL_START_Y + 2 * LABEL_OFFSET));
-	SDL_RenderCopy(renderer, texture, NULL, &bounds);
-	SDL_DestroyTexture(texture);
+	Utils::drawText(blueLabel, BLACK, renderer, &font, glm::ivec2(LABEL_START_X, LABEL_START_Y + 2 * LABEL_OFFSET), COLOR_PICKER_WIDTH);
 
 	// draw button border
 	bounds = submitButton.getBounds();
-	color = submitButton.getColor();
 
-	SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
-	SDL_RenderFillRect(renderer, &bounds);
-
-	// draw submit button
-	font.obtainTextData(SUBMIT_BUTTON, BLACK, renderer, &texture, &bounds, glm::ivec2(LABEL_START_X, LABEL_START_Y + 2 * LABEL_OFFSET));
-
-	SDL_RenderCopy(renderer, texture, NULL, &bounds);
-	SDL_DestroyTexture(texture);
+	Utils::drawButton(submitButton.getColor(), SUBMIT_BUTTON, BLACK, renderer, &font, glm::ivec4(bounds.x, bounds.y, bounds.w, bounds.h));
 
 	// update screen
 	SDL_RenderPresent(renderer);

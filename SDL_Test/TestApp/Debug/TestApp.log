@@ -1,7 +1,4 @@
 ﻿  Main.cpp
   MainFrame.cpp
-  TextLine.cpp
-D:\Users\Jovan\c++\SDL_Testing\SDL_Test\TestApp\TextLine.cpp(39,46): warning C4018: '<': signed/unsigned mismatch
-  TextPanel.cpp
   Generating Code...
-  TestApp.vcxproj -> D:\Users\Jovan\c++\SDL_Testing\SDL_Test\Debug\TestApp.exe
+  TestApp.vcxproj -> D:\Users\Jovan\C++\SDL_Testing\SDL_Test\Debug\TestApp.exe

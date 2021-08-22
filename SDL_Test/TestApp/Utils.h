@@ -30,7 +30,7 @@ public:
 	static void setActionState(int ID);
 	static void drawText(std::string text, Color color, SDL_Renderer* renderer, Font* font, glm::ivec2 position);
 	static void drawText(std::string text, Color color, SDL_Renderer* renderer, Font* font, glm::ivec2 position, int width);
-	static void drawRectangle(Color textColor, SDL_Renderer* renderer, glm::ivec4 posisiton);
+	static void drawRectangle(Color color, SDL_Renderer* renderer, glm::ivec4 posisiton, bool fill = true);
 	static void drawButton(Color buttonColor, std::string text, Color textColor, SDL_Renderer* renderer, Font* font, glm::ivec4 posisiton);
 	static void drawCenteredText(std::string text, Color color, SDL_Renderer* renderer, Font* font, glm::ivec4 dimensions);
 	static SDL_Window* createWindow(std::string title, glm::ivec2 dimensions);

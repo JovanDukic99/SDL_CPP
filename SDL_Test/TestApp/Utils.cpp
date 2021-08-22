@@ -145,9 +145,6 @@ SDL_Cursor* Utils::getCursor(Mode state) {
     case Mode::ERASING: {
         return SDL_CreateColorCursor(ImageLoader::loadCursorSurface(RUBBER_CURSOR_PATH), RUBBER_CURSOR_HOT_X, RUBBER_CURSOR_HOT_Y);
     }
-    case Mode::BUCKET_PAINTING: {
-        return SDL_CreateColorCursor(ImageLoader::loadCursorSurface(BUCKET_CURSOR_PATH), BUCKET_CURSOR_HOT_X, BUCKET_CURSOR_HOT_Y);
-    }
     case Mode::TEXT: {
         return SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
     }
@@ -310,18 +307,8 @@ void Utils::setUtilityButton(int index, SDL_Renderer* renderer, SDL_Texture** te
         break;
     }
     case 1: {
-        *texture = ImageLoader::loadTexture(BUCKET_BUTTON_PATH, renderer);
-        *ID = BUCKET_BUTTON_ID;
-        break;
-    }
-    case 2: {
         *texture = ImageLoader::loadTexture(RUBBER_BUTTON_PATH, renderer);
         *ID = RUBBER_BUTTON_ID;
-        break;
-    }
-    case 3: {
-        *texture = ImageLoader::loadTexture(TEXT_BUTTON_PATH, renderer);
-        *ID = TEXT_BUTTON_ID;
         break;
     }
     default:
@@ -336,10 +323,6 @@ void Utils::setActionState(int ID) {
     {
     case PENCIL_BUTTON_ID: {
         Controller::getInstance()->setMode(Mode::PAINTING);
-        break;
-    }
-    case BUCKET_BUTTON_ID: {
-        Controller::getInstance()->setMode(Mode::BUCKET_PAINTING);
         break;
     }
     case RUBBER_BUTTON_ID: {
@@ -376,10 +359,15 @@ void Utils::drawText(std::string text, Color color, SDL_Renderer* renderer, Font
     SDL_DestroyTexture(texture);
 }
 
-void Utils::drawRectangle(Color buttonColor,SDL_Renderer* renderer, glm::ivec4 posisiton) {
+void Utils::drawRectangle(Color color,SDL_Renderer* renderer, glm::ivec4 posisiton, bool fill) {
     SDL_Rect bounds = { posisiton.x, posisiton.y, posisiton.z, posisiton.w };
-    SDL_SetRenderDrawColor(renderer, buttonColor.getR(), buttonColor.getG(), buttonColor.getB(), buttonColor.getA());
-    SDL_RenderFillRect(renderer, &bounds);
+    SDL_SetRenderDrawColor(renderer, color.getR(), color.getG(), color.getB(), color.getA());
+    if (fill) {
+        SDL_RenderFillRect(renderer, &bounds);
+    }
+    else {
+        SDL_RenderDrawRect(renderer, &bounds);
+    }
 }
 
 void Utils::drawButton(Color buttonColor, std::string text, Color textColor, SDL_Renderer* renderer, Font* font, glm::ivec4 posisiton) {
@@ -404,7 +392,7 @@ SDL_Window* Utils::createWindow(std::string title, glm::ivec2 dimensions) {
 
     // create window
     if (window == nullptr) {
-        window = SDL_CreateWindow(MESSAGE_PANEL.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, dimensions.x, dimensions.y, SDL_WINDOW_SHOWN | SDL_WINDOW_ALWAYS_ON_TOP);
+        window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, dimensions.x, dimensions.y, SDL_WINDOW_SHOWN | SDL_WINDOW_ALWAYS_ON_TOP);
     }
 
     if (window == nullptr) {

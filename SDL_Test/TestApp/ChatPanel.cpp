@@ -1,70 +1,68 @@
 #include "ChatPanel.h"
 #include "Config.h"
 #include "Color.h"
+#include "Controller.h"
+#include "Utils.h"
 #include <iostream>
 
-ChatPanel::ChatPanel() : offsetY(0) {
-	init();
+ChatPanel::ChatPanel() : GUIBase(), offsetY(0), textLine(nullptr), font(nullptr), renderer(nullptr) {
+	
 }
 
-void ChatPanel::init() {
+ChatPanel::~ChatPanel() {
+
+}
+
+void ChatPanel::init(SDL_Renderer* renderer, Font* font) {
+	setRenderer(renderer);
+	setFont(font);
 	setPosition(glm::ivec2(CHAT_PANEL_START_X, CHAT_PANEL_START_Y));
 	setDimension(glm::ivec2(CHAT_PANEL_WIDTH, CHAT_PANEL_HEIGHT));
-	setChange(true);
+	initTextLine();
 }
 
 void ChatPanel::draw() {
-	if (change) {
-		// repaint background
-		SDL_Rect bounds = {CHAT_PANEL_START_X, CHAT_PANEL_START_Y, CHAT_PANEL_WIDTH, TEXT_PANEL_HEIGHT + TTF_FontHeight(font->getFont())};
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-		SDL_RenderFillRect(renderer, &bounds);
+	// draw panels
+	drawPanels();
 
-		// draw chatPanel
-		drawChatPanel();
+	// draw messages
+	drawMessages();
 
-		// draw subPanels
-		drawSubPanels();
-
-		// draw messages
-		drawMessages();
-
-		setChange(false);
+	if (textLine != nullptr) {
+		textLine->draw();
 	}
 }
 
-void ChatPanel::drawChatPanel() {
-	SDL_Rect bounds = { position.x, position.y, dimension.x, dimension.y };
-	Color c = BLACK;
-	SDL_SetRenderDrawColor(renderer, c.getR(), c.getG(), c.getB(), c.getA());
-	SDL_RenderDrawRect(renderer, &bounds);
+void ChatPanel::update(Uint32 deltaTime) {
+	updateTextLine(deltaTime);
+	enterEvent();
 }
 
-void ChatPanel::drawSubPanels() {
-	Color c = BLACK;
+void ChatPanel::drawPanels() {
+	// draw background color
+	Utils::drawRectangle(WHITE, renderer, glm::ivec4(CHAT_PANEL_START_X, CHAT_PANEL_START_Y, CHAT_PANEL_WIDTH, CHAT_PANEL_HEIGHT));
+
+	// draw border
+	Utils::drawRectangle(RED, renderer, glm::ivec4(CHAT_PANEL_START_X, CHAT_PANEL_START_Y, CHAT_PANEL_WIDTH, CHAT_PANEL_HEIGHT), false);
 
 	// draw textPanel
-	SDL_Rect bounds = { TEXT_PANEL_START_X, TEXT_PANEL_START_Y, TEXT_PANEL_WIDTH, TEXT_PANEL_HEIGHT };
-	SDL_SetRenderDrawColor(renderer, c.getR(), c.getG(), c.getB(), c.getA());
-	SDL_RenderDrawRect(renderer, &bounds);
+	Utils::drawRectangle(RED, renderer, glm::ivec4(TEXT_PANEL_START_X, TEXT_PANEL_START_Y, TEXT_PANEL_WIDTH, TEXT_PANEL_HEIGHT), false);
 
 	// draw inputPanel
-	bounds = { INPUT_PANEL_START_X, INPUT_PANEL_START_Y, INPUT_PANEL_WIDTH, INPUT_PANEL_HEIGHT };
-	SDL_SetRenderDrawColor(renderer, c.getR(), c.getG(), c.getB(), c.getA());
-	SDL_RenderDrawRect(renderer, &bounds);
+	Utils::drawRectangle(RED, renderer, glm::ivec4(INPUT_PANEL_START_X, INPUT_PANEL_START_Y, INPUT_PANEL_WIDTH, INPUT_PANEL_HEIGHT), false);
 }
 
 void ChatPanel::drawMessages() {
-	if (offsetY > TEXT_PANEL_START_Y + TEXT_PANEL_HEIGHT - 2 * TTF_FontHeight(font->getFont())) {
+	if (offsetY > TEXT_PANEL_START_Y + TEXT_PANEL_HEIGHT - TTF_FontHeight(font->getFont())) {
 		messages.pop();
 	}
 
 	std::queue<std::string> temp = messages;
-
+	std::string username = Controller::getInstance()->getUsername();
 	int i = 0;
 
 	while (!temp.empty()) {
-		std::string text = temp.front();
+		std::string text = username + ": " + temp.front();
 
 		SDL_Texture* texture = nullptr;
 		SDL_Rect bounds;
@@ -82,16 +80,38 @@ void ChatPanel::drawMessages() {
 	}
 }
 
-void ChatPanel::addMessage(std::string message) {
-	messages.push(message);
+void ChatPanel::initTextLine() {
+	if (textLine == nullptr) {
+		textLine = new TextLine(glm::ivec2(INPUT_PANEL_START_X + 2, INPUT_PANEL_START_Y + ((INPUT_PANEL_HEIGHT - font->getTextHeight()) / 2)), 10, renderer, font);
+		textLine->setEnable(false);
+	}
 }
 
-void ChatPanel::setChange(bool change) {
-	this->change = change;
+void ChatPanel::enterEvent() {
+	if (textLine->isEnabled() && inputManager->isKeyPressed(SDLK_RETURN)) {
+		addMessage(textLine->getText());
+		textLine->clear();
+		inputManager->releaseKey(SDLK_RETURN);
+	}
 }
 
-void ChatPanel::update(Uint32 deltaTime) {
-	change = true;
+void ChatPanel::updateTextLine(Uint32 deltaTime) {
+	if (textLine == nullptr) {
+		return;
+	}
+
+	glm::ivec2 mouseCoords = inputManager->getMouseCoordinates();
+
+	if (!textLine->isEnabled() && Utils::isPointInsideBounds(mouseCoords, glm::ivec4(INPUT_PANEL_START_X, INPUT_PANEL_START_Y, INPUT_PANEL_WIDTH, INPUT_PANEL_HEIGHT)) && inputManager->isKeyPressed(SDL_BUTTON_LEFT)) {
+		textLine->setEnable(true);
+	}
+	else if (textLine->isEnabled() && Utils::isPointInsideBounds(mouseCoords, glm::ivec4(CHAT_PANEL_START_X, CHAT_PANEL_START_Y, CHAT_PANEL_WIDTH, CHAT_PANEL_HEIGHT))) {
+		textLine->update(deltaTime);
+	}
+	else if (textLine->isEnabled() && !Utils::isPointInsideBounds(mouseCoords, glm::ivec4(CHAT_PANEL_START_X, CHAT_PANEL_START_Y, CHAT_PANEL_WIDTH, CHAT_PANEL_HEIGHT))) {
+		textLine->setEnable(false);
+		textLine->setVisibleCursor(false);
+	}
 }
 
 void ChatPanel::setRenderer(SDL_Renderer* renderer) {
@@ -100,6 +120,12 @@ void ChatPanel::setRenderer(SDL_Renderer* renderer) {
 
 void ChatPanel::setFont(Font* font) {
 	this->font = font;
+}
+
+void ChatPanel::addMessage(std::string message) {
+	if (!message.empty()) {
+		messages.push(message);
+	}
 }
 
 

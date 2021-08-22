@@ -103,7 +103,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="TextLine.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -165,7 +165,7 @@
       <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="TextLine.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
