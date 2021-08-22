@@ -350,3 +350,7 @@ bool ColorPicker::isVisible() const {
 Color ColorPicker::getColor() const {
 	return color;
 }
+
+SDL_Window* ColorPicker::getWindow() const {
+	return window;
+}

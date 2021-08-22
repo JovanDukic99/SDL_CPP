@@ -68,3 +68,7 @@ void MessagePanel::closeWindow() {
 	setIsPressed(false);
 	setButtonColor(GRAY);
 }
+
+SDL_Window* MessagePanel::getWindow() const {
+	return window;
+}

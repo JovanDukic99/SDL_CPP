@@ -58,6 +58,7 @@ public:
 	// getters
 	bool isVisible() const;
 	Color getColor() const;
+	SDL_Window* getWindow() const;
 private:
 	// init
 	void initWindow();

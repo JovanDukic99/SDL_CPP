@@ -177,10 +177,11 @@ void MainFrame::handleWindowEvents(SDL_Event& event) {
 	switch (event.window.event)
 	{
 	case SDL_WINDOWEVENT_CLOSE: {
-		if (event.window.windowID != SDL_GetWindowID(window)) {
-			controller->setMode(controller->getPreviousActionState());
-			updateCursor();
+		if (event.window.windowID == SDL_GetWindowID(colorPicker.getWindow())) {
 			colorPicker.closeWindow();
+		}
+		else if (event.window.windowID == SDL_GetWindowID(messagePanel.getWindow())) {
+			messagePanel.closeWindow();
 		}
 		break;
 	}
@@ -205,7 +206,7 @@ void MainFrame::update() {
 	}
 
 	updateColorPicker();
-	// updateMessagePanel();
+	updateMessagePanel();
 	updateTextPanel();
 
 	if (textPanel.isVisible() || messagePanel.isVisible() || colorPicker.isVisible()) {

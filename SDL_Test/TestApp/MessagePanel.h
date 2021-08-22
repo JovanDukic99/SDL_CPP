@@ -25,6 +25,7 @@ public:
 	void draw();
 	void update();
 	void closeWindow();
+	SDL_Window* getWindow() const;
 private:
 	void initComponents();
 	void setIsPressed(bool isPressed);
