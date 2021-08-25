@@ -31,7 +31,7 @@ void TextPanel::draw() {
 	SDL_RenderFillRect(renderer, NULL);
 
 	// draw text background
-	Utils::drawRectangle(CITRON, renderer, glm::ivec4(TEXTING_PANEL_WIDTH / 2 - 75, TEXTING_PANEL_HEIGHT / 2 - font->getTextHeight(), 150, font->getTextHeight()));
+	Utils::drawRectangle(BLACK, renderer, glm::ivec4(TEXTING_PANEL_WIDTH / 2 - 75, TEXTING_PANEL_HEIGHT / 2 - font->getTextHeight(), 150, font->getTextHeight()), false);
 
 	// draw submit button
 	Utils::drawButton(buttonColor, "Submit", BLACK, renderer, font, button);
